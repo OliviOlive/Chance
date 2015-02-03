@@ -9,6 +9,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Window;
 import java.awt.image.BufferStrategy;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import oli.bbp.gfx.OliRenderer;
@@ -89,14 +90,36 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        if (args.length > 0 && args[1].equals("output")) {
+        if (args.length == 0) {
+            log.log(Level.SEVERE, "Please ensure at least one argument is supplied: args[1]: input script file, args[2]optional: output directory");
+            System.exit(1);
+        }
+        
+        File inScript = new File(args[0]);
+        if (! inScript.exists()) {
+            System.err.println("Input file does not exist!");
+            System.exit(2);
+        }
+        
+        try {
+            ScriptReader.parseScript(inScript);
+        } catch (Exception ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            System.exit(3);
+        }
+        
+        if (args.length > 1) {
             log.info("Rendering frames to directory.");
-            File imgDir = new File(args[2]);
+            File imgDir = new File(args[1]);
+            
+            if (! imgDir.exists()) {
+                log.log(Level.INFO, "Creating directory: {0}", imgDir.getAbsolutePath());
+                imgDir.mkdirs();
+            }
         } else {
             isOnscreen = true;
             log.info("Rendering frames to screen, in real-time.");
             onScreenMode();
         }
-    }
-    
+    }   
 }

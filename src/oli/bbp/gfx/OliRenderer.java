@@ -9,7 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import oli.bbp.Main;
 
-public class OliRenderer {
+public class OliRenderer {    
     /**
      * The number of frames that have been rendered.
      */
@@ -25,7 +25,7 @@ public class OliRenderer {
      * Processes keyframing, etc of next frame.
      */
     public static void preprocessFrame() {
-        
+        ++frameNum;
     }
     
     /**
@@ -33,7 +33,6 @@ public class OliRenderer {
      * @param g Graphics object to be rendered to
      */
     public static void renderFrame(Graphics2D g) {
-        ++frameNum;
         g.setColor(Color.black);
         g.fillRect(0, 0, Main.WIDTH, Main.HEIGHT);
         
