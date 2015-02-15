@@ -4,7 +4,7 @@
 package oli.bbp;
 
 /**
- *
+ * Class for Dimension & Coordinate manipulation. Note that time /is/ an included dimension.
  * @author oliver
  */
 public class DimensionHelper {
@@ -12,6 +12,8 @@ public class DimensionHelper {
     public static final int RESOLUTION_WIDTH = 1920;
     public static final int RESOLUTION_HEIGHT = 1080;
     public static final int FRAMES_PER_SECOND = 30;
+    
+    public static final double DOWNSCALE = 0.666666;
     
     /**
      * Gets the X coordinate/size from the input integer or string.
@@ -23,7 +25,7 @@ public class DimensionHelper {
         if (in instanceof String) {
             String ins = (String) in;
             if (ins.charAt(ins.length() - 1) == '%') {
-                String sub = ins.substring(0, ins.length() - 2);
+                String sub = ins.substring(0, ins.length() - 1);
                 Double percent = Double.parseDouble(sub);
                 return (int) Math.floor((percent / 100) * RESOLUTION_WIDTH);
             } else {
@@ -43,7 +45,7 @@ public class DimensionHelper {
         if (in instanceof String) {
             String ins = (String) in;
             if (ins.charAt(ins.length() - 1) == '%') {
-                String sub = ins.substring(0, ins.length() - 2);
+                String sub = ins.substring(0, ins.length() - 1);
                 Double percent = Double.parseDouble(sub);
                 return (int) Math.floor((percent / 100) * RESOLUTION_HEIGHT);
             } else {
@@ -51,6 +53,20 @@ public class DimensionHelper {
             }
         }
         return 0;
+    }
+    
+    /**
+     * A method to scale down dimensions to 1280x720 (from 1920x1080)
+     * @param in
+     * @return 
+     */
+    public static int scaleDimensions(int in) {
+        return (int) Math.floor(in * DOWNSCALE);
+    }
+    
+    public static int getRealDimensions(int in) {
+        if (Main.isOnscreen) return scaleDimensions(in);
+        return in;
     }
     
     /**

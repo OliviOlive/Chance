@@ -9,7 +9,6 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Window;
 import java.awt.image.BufferStrategy;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import oli.bbp.gfx.OliRenderer;
@@ -51,17 +50,23 @@ public class Main {
         
         long timeMillis = System.currentTimeMillis();
         
+        //long totalSleepy = 0;
+        
+        OliRenderer.renderStartTime = timeMillis;
+        
         while (true) {
-            // wait until 1/30 second has passed... i.e ~33 ms (accurate enough!)
             long curTim = System.currentTimeMillis();
             if (curTim < timeMillis) {
                 try {
-                    Thread.sleep(timeMillis - curTim);
+                    long sleepy = timeMillis - curTim;
+                    //totalSleepy += sleepy;
+                    Thread.sleep(sleepy);       
                 } catch (InterruptedException ex) {
                     log.log(Level.SEVERE, null, ex);
                 }
             }
-            timeMillis = curTim + 33; // schedule the next one in 33 ms
+            curTim = System.currentTimeMillis();
+            timeMillis = curTim + (1000 / DimensionHelper.FRAMES_PER_SECOND); // schedule the next one in 33 ms
             
             bufStrat.show();
             
