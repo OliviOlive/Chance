@@ -28,11 +28,20 @@ public class Molecule {
             this.y += mv2d.y;
         }
         
+        public void subtract(MolVector2D mv2d) {
+            this.x -= mv2d.x;
+            this.y -= mv2d.y;
+        }
+        
         public void reverseX() {
             this.x = -this.x;
         }
         public void reverseY() {
             this.y = -this.y;
+        }
+        
+        public boolean isNullVector() {
+            return (this.x == 0.0) && (this.y == 0.0);
         }
         
         public double distanceToSquared(MolVector2D mv2d) {
@@ -58,13 +67,13 @@ public class Molecule {
     public double kineticEnergy, velocity;
     public int radius, mass;
     
-    public Color colour;
+    public String colGroup;
     
-    public Molecule(MolVector2D basis, MolVector2D momentum, int radius, int mass, Color col) {
+    public Molecule(MolVector2D basis, MolVector2D momentum, int radius, int mass, String colGroup) {
         this.basis = basis;
         this.momentum = momentum;
         this.radius = radius;
         this.mass = mass;
-        this.colour = col;
+        this.colGroup = colGroup;
     }
 }

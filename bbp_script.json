@@ -21,13 +21,30 @@
     "sim_001": {
       "type": "parsim",
       "bounds": ["10%", "10%", "80%", "80%"],
+      "borderColour": "#6699ff",
+      "colourGroups": {
+        "red": ["#ffaaaa", "#ff0000", "#874444", "#452222"],
+        "blue": ["#44aaff", "#0000ff", "#445587", "#222245"],
+        "white": ["#ffffff", "#aaaaaa", "#878787", "#545454"],
+        "green": ["#aaffaa", "#00ff00", "#448744", "#224522"],
+      },
       "simulator": {
         "size": ["80%", "80%"],
-        "borderColour": "#6699ff",
         particles: [
-          [50, 20, "#ffffff", "50%", "50%", 0.1, 0.1],
+          [50, 20, "blue", "50%", "50%", 2, 0.5],
+          [50, 20, "red", "50%", "75%", 50, 70],
+          [75, 70, "white", "50%", "25%", 0.0, 0.0],
+          [20, 5, "green", "5%", "5%", 0.0, 0.0],
+          [20, 5, "green", "10%", "5%", 0.0, 0.0],
+          [20, 5, "green", "5%", "10%", 0.0, 0.0],
+          [20, 5, "green", "10%", "10%", 0.0, 0.0],
         ],
+        "speed": 20,
       },
+      "showVectors": true,
+      "drawnVectorWidth": 8.0,
+      "drawnVectorColour": "#66bbee",
+      "drawnVectorScalar": 10.0,
     },
   },
   "tween": [

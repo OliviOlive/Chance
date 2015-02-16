@@ -63,12 +63,21 @@ public class DimensionHelper {
         return (float) Math.floor(in * DOWNSCALE);
     }
     
+    public static double scaleDimensions(double in) {
+        return Math.floor(in * DOWNSCALE);
+    }
+    
     public static int getRealDimensions(int in) {
         if (Main.isOnscreen) return scaleDimensions(in);
         return in;
     }
     
     public static float getRealDimensions(float in) {
+        if (Main.isOnscreen) return scaleDimensions(in);
+        return in;
+    }
+    
+    public static double getRealDimensions(double in) {
         if (Main.isOnscreen) return scaleDimensions(in);
         return in;
     }
