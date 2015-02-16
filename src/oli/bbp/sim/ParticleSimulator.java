@@ -3,6 +3,12 @@
  */
 package oli.bbp.sim;
 
+import java.awt.Color;
+import oli.bbp.DimensionHelper;
+import oli.bbp.ScriptReader;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 /**
  *
  * @author oliver
@@ -14,6 +20,52 @@ public class ParticleSimulator {
     public int simWidth, simHeight;
     
     public double simSpeed = 0.1;
+    
+    public ParticleSimulator(JSONObject config) {
+        Object o = config.get("size");
+        ScriptReader.ScriptFormatException.assertion(
+                (o != null) && (o instanceof JSONArray),
+                "Sim: 'size' should be array."
+        );
+        JSONArray ja = (JSONArray) o;
+        ScriptReader.ScriptFormatException.assertion(
+                ja.length() == 2,
+                "Sim: 'size'.length!=2"
+        );
+        this.simWidth = DimensionHelper.getX(ja.get(0));
+        this.simHeight = DimensionHelper.getY(ja.get(1));
+        
+        if (config.has("particles")) {
+            o = config.get("particles");
+            ScriptReader.ScriptFormatException.assertion(
+                    o instanceof JSONArray,
+                    "Sim: 'particles' should be array."
+            );
+            ja = (JSONArray) o;
+            int parl = ja.length();
+            this.mols = new Molecule[parl];
+            this.molCount = parl;
+            for (int pari = 0; pari < parl; ++pari) {
+                JSONArray parja = ja.getJSONArray(pari);
+                int radius = parja.getInt(0);
+                int mass = parja.getInt(1);
+                Color col = ScriptReader.strToColour(parja.getString(2));
+                int posX = DimensionHelper.getOf(parja.getString(3), this.simWidth);
+                int posY = DimensionHelper.getOf(parja.getString(4), this.simHeight);
+                
+                double momX = parja.getDouble(5);
+                double momY = parja.getDouble(6);
+                
+                mols[pari] = new Molecule(
+                        new Molecule.MolVector2D(posX, posY),
+                        new Molecule.MolVector2D(momX, momY),
+                        radius,
+                        mass,
+                        col
+                );
+            }
+        }
+    }
     
     public void update() {
         for (int moli = 0; moli < molCount; ++moli) {

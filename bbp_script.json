@@ -1,5 +1,5 @@
 {
-  "duration": 300.0,
+  "duration": 240.0,
   "gobjs": {
     "image_001": {
       "type": "image",
@@ -17,9 +17,21 @@
       "bounds": ["40%", "40%", "20%", "20%"],
       "colour": "#ff0000",
     },
+
+    "sim_001": {
+      "type": "parsim",
+      "bounds": ["10%", "10%", "80%", "80%"],
+      "simulator": {
+        "size": ["80%", "80%"],
+        "borderColour": "#6699ff",
+        particles: [
+          [50, 20, "#ffffff", "50%", "50%", 0.1, 0.1],
+        ],
+      },
+    },
   },
   "tween": [
-    ["opacity", ["rect_001", "image_001"], 0.0, null, [1]],
+    ["opacity", ["rect_001", "image_001", "sim_001"], 0.0, null, [1]],
     ["bounds", "rect_001", 0.0, 5.0, ["20%", "20%", "60%", "60%"]],
     ["opacity", ["rect_001", "image_001"], 0.1, 3.0, [0.0]],
     ["opacity", ["rect_001", "image_001"], 3.1, 5.0, [1]],

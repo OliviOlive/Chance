@@ -15,19 +15,16 @@ public class DimensionHelper {
     
     public static final double DOWNSCALE = 0.666666;
     
-    /**
-     * Gets the X coordinate/size from the input integer or string.
-     * @param in
-     * @return 
-     */
-    public static int getX(Object in) {
+    
+    
+    public static int getOf(Object in, int of) {
         if (in instanceof Integer) return (int) in;
         if (in instanceof String) {
             String ins = (String) in;
             if (ins.charAt(ins.length() - 1) == '%') {
                 String sub = ins.substring(0, ins.length() - 1);
                 Double percent = Double.parseDouble(sub);
-                return (int) Math.floor((percent / 100) * RESOLUTION_WIDTH);
+                return (int) Math.floor((percent / 100) * of);
             } else {
                 throw new ScriptReader.ScriptFormatException("Unknown size: " + ins);
             }
@@ -36,23 +33,21 @@ public class DimensionHelper {
     }
     
     /**
+     * Gets the X coordinate/size from the input integer or string.
+     * @param in
+     * @return 
+     */
+    public static int getX(Object in) {
+        return getOf(in, RESOLUTION_WIDTH);
+    }
+    
+    /**
      * Gets the Y coordinate/size from the input integer or string.
      * @param in - INTEGER or STRING(num + '%')
      * @return 
      */
     public static int getY(Object in) {
-        if (in instanceof Integer) return (int) in;
-        if (in instanceof String) {
-            String ins = (String) in;
-            if (ins.charAt(ins.length() - 1) == '%') {
-                String sub = ins.substring(0, ins.length() - 1);
-                Double percent = Double.parseDouble(sub);
-                return (int) Math.floor((percent / 100) * RESOLUTION_HEIGHT);
-            } else {
-                throw new ScriptReader.ScriptFormatException("Unknown size: " + ins);
-            }
-        }
-        return 0;
+        return getOf(in, RESOLUTION_HEIGHT);
     }
     
     /**
@@ -64,7 +59,16 @@ public class DimensionHelper {
         return (int) Math.floor(in * DOWNSCALE);
     }
     
+    public static float scaleDimensions(float in) {
+        return (float) Math.floor(in * DOWNSCALE);
+    }
+    
     public static int getRealDimensions(int in) {
+        if (Main.isOnscreen) return scaleDimensions(in);
+        return in;
+    }
+    
+    public static float getRealDimensions(float in) {
         if (Main.isOnscreen) return scaleDimensions(in);
         return in;
     }

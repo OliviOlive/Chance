@@ -60,10 +60,11 @@ public class Molecule {
     
     public Color colour;
     
-    public Molecule(MolVector2D basis, MolVector2D momentum, int radius, int mass) {
+    public Molecule(MolVector2D basis, MolVector2D momentum, int radius, int mass, Color col) {
         this.basis = basis;
         this.momentum = momentum;
         this.radius = radius;
         this.mass = mass;
+        this.colour = col;
     }
 }

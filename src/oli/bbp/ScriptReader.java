@@ -34,6 +34,16 @@ public class ScriptReader {
         public ScriptFormatException(TweenDeclaration td, String message) {
             super(td + ": " + message);
         }
+        
+        public ScriptFormatException(Gobject gob, String message) {
+            super(gob + ": " + message);
+        }
+        
+        public static void assertion(boolean cond, String message) {
+            if (! cond) {
+                throw new ScriptFormatException(message);
+            }
+        }
     }
     
     public static Color strToColour(String hexIn) {

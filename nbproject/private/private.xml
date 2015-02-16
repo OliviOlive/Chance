@@ -5,14 +5,16 @@
         <group>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/Main.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/DimensionHelper.java</file>
+            <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/gfx/gobj/ParticleSimGobject.java</file>
+            <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/sim/Molecule.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/ScriptReader.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/gfx/gobj/Gobject.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/gfx/gobj/TextGobject.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/gfx/OliRenderer.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/gfx/gobj/ImageGobject.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/gfx/TweenDeclaration.java</file>
+            <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/sim/ParticleSimulator.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/gfx/GfxHelper.java</file>
-            <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/gfx/gobj/RectGobject.java</file>
         </group>
     </open-files>
 </project-private>

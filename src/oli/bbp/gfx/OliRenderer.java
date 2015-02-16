@@ -82,6 +82,7 @@ public class OliRenderer {
             if (gob.opacity > 0.0) {
                 BufferedImage bi = new BufferedImage(Main.WIDTH, Main.HEIGHT, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D gbi = bi.createGraphics();
+                setupHints(gbi);
                 gob.draw(gbi);
                 g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, gob.opacity));
                 g.drawImage(bi, null, 0, 0);
