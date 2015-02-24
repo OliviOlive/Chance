@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.logging.Logger;
 import oli.bbp.gfx.OliRenderer;
 import oli.bbp.gfx.TweenDeclaration;
@@ -52,6 +53,8 @@ public class ScriptReader {
     
     public static JSONObject jo;
     private static final Logger log = Logger.getLogger(Main.class.getName());
+    
+    public static HashMap<String, File> resMap = new HashMap<>();
     
     public static void validateTween(TweenDeclaration td) {
         switch (td.affectedProperty) {
@@ -97,6 +100,19 @@ public class ScriptReader {
         }
         if (! jo.has("tween")) {
             throw new ScriptFormatException("Missing 'tween' section.");
+        }
+        
+        if (jo.has("resources")) {
+            JSONObject resjo = jo.getJSONObject("resources");
+            for (Object tkey: resjo.keySet()) {
+                String skey = (String) tkey;
+                // register the resource
+                File f = new File(resjo.getString(skey));
+                if (! f.exists()) {
+                    log.severe("Resource does not exist on filesystem: " + skey);
+                }
+                ScriptReader.resMap.put(skey, f);
+            }
         }
         
         OliRenderer.frameDur = DimensionHelper.getFramesFromSeconds(jo.getDouble("duration"));

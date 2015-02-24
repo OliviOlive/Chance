@@ -12,7 +12,9 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import oli.bbp.DimensionHelper;
 import oli.bbp.Main;
+import oli.bbp.ScriptReader;
 import oli.bbp.gfx.gobj.Gobject;
+import oli.bbp.sfx.SoundScheduler;
 
 public class OliRenderer {    
     /**
@@ -54,6 +56,7 @@ public class OliRenderer {
     
     /**
      * Actually draws the next frame.
+     *  It additionally triggers sounds in the Sound Scheduler.
      * @param g Graphics object to be rendered to
      */
     public static void renderFrame(Graphics2D g) {

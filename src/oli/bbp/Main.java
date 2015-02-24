@@ -12,6 +12,9 @@ import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import oli.bbp.gfx.OliRenderer;
+import oli.bbp.sfx.DisplaySoundScheduler;
+import oli.bbp.sfx.SoundScheduler;
+import oli.bbp.sfx.ToFileSoundScheduler;
 
 /**
  *
@@ -31,6 +34,8 @@ public class Main {
     public static final int HEIGHT = 720;
     
     public static void onScreenMode() {
+        SoundScheduler.instance = new DisplaySoundScheduler();
+        
         genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
         gdev = genv.getDefaultScreenDevice();
         gcfg = gdev.getDefaultConfiguration();
@@ -88,7 +93,7 @@ public class Main {
     }
     
     public static void toFileMode(File f) {
-        
+        SoundScheduler.instance = new ToFileSoundScheduler();
     }
     
     /**

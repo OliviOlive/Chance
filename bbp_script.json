@@ -1,5 +1,8 @@
 {
   "duration": 240.0,
+  "resources": {
+    "ching": "res/sfx-ching-nocommit.wav",
+  },
   "gobjs": {
     "image_001": {
       "type": "image",
