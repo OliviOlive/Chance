@@ -8,7 +8,9 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Window;
 import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import oli.bbp.gfx.OliRenderer;
@@ -32,6 +34,8 @@ public class Main {
     
     public static final int WIDTH = 1280;
     public static final int HEIGHT = 720;
+    public static final int REPORT_EVERY_FRAMES = 600;
+    public static final int DIGITS_FRAMES = 6;
     
     public static void onScreenMode() {
         SoundScheduler.instance = new DisplaySoundScheduler();
@@ -59,7 +63,7 @@ public class Main {
         
         OliRenderer.renderStartTime = timeMillis;
         
-        while (true) {
+        while (OliRenderer.frameNum < OliRenderer.frameDur) {
             long curTim = System.currentTimeMillis();
             if (curTim < timeMillis) {
                 try {
@@ -92,8 +96,29 @@ public class Main {
         }
     }
     
-    public static void toFileMode(File f) {
-        SoundScheduler.instance = new ToFileSoundScheduler();
+    public static void toFileMode(File directorySave) throws IOException {
+        ToFileSoundScheduler tfss = new ToFileSoundScheduler();
+        SoundScheduler.instance = tfss;
+        
+        while (OliRenderer.frameNum < OliRenderer.frameDur) {
+            String filename = directorySave.getPath() + File.separatorChar + String.format("%8d.png", OliRenderer.frameNum).replace(' ', '0');
+            OliRenderer.preprocessFrame();
+            BufferedImage bi = new BufferedImage(DimensionHelper.RESOLUTION_WIDTH, DimensionHelper.RESOLUTION_HEIGHT, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = bi.createGraphics();
+            OliRenderer.setupHints(g2d);
+            OliRenderer.renderFrame(g2d);
+            g2d.dispose();
+            // audio-run ImageIO.write(bi, "png", new File(filename));
+            if (OliRenderer.frameNum % 200 == 0) {
+                log.log(Level.INFO, "Frame: {0}", OliRenderer.frameNum);
+            }
+        }
+        
+        log.info("Finished frames, starting mixdown.");
+        
+        tfss.mixAndSave(directorySave.getPath() + File.separatorChar + "audio.wav");
+        
+        log.info("Finished mixdown.");
     }
     
     /**
@@ -125,6 +150,12 @@ public class Main {
             if (! imgDir.exists()) {
                 log.log(Level.INFO, "Creating directory: {0}", imgDir.getAbsolutePath());
                 imgDir.mkdirs();
+            }
+            
+            try {
+                toFileMode(imgDir);
+            } catch (IOException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             isOnscreen = true;

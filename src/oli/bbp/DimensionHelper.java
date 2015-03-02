@@ -8,11 +8,13 @@ package oli.bbp;
  * @author oliver
  */
 public class DimensionHelper {
-    
     public static final int RESOLUTION_WIDTH = 1920;
     public static final int RESOLUTION_HEIGHT = 1080;
-    public static final int FRAMES_PER_SECOND = 30;
     
+    // it is recommended that -Dolibbp.framerate=60 argument is provided when exporting
+    public static final int FRAMES_PER_SECOND = Integer.parseInt(System.getProperty("olibbp.framerate", "30"));
+    
+    // downscale from production resolution to display resolution
     public static final double DOWNSCALE = 0.666666;
     
     

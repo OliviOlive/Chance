@@ -8,20 +8,15 @@ import java.util.ArrayList;
 import oli.bbp.gfx.OliRenderer;
 
 public class ToFileSoundScheduler extends SoundScheduler {
-    public static class SoundEvent {
-        public int startFrame;
-        public File soundFile;
-        
-        public SoundEvent(int start, File sndF) {
-            this.startFrame = start;
-            this.soundFile = sndF;
-        }
-    }
-    
     public ArrayList<SoundEvent> soundEvents = new ArrayList<>();
     
     @Override
-    public void playSound(File sound) {
-        soundEvents.add(new SoundEvent(OliRenderer.frameNum, sound));
+    public void playSound(File sound, float volume) {
+        soundEvents.add(new SoundEvent(OliRenderer.frameNum, sound, volume));
+    }
+    
+    public void mixAndSave(String soundFilename) {
+        AudioMixer am = new AudioMixer();
+        am.mixDown(soundEvents, new File(soundFilename));
     }
 }

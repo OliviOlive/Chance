@@ -12,14 +12,12 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import oli.bbp.DimensionHelper;
 import oli.bbp.Main;
-import oli.bbp.ScriptReader;
 import oli.bbp.gfx.gobj.Gobject;
 import oli.bbp.sfx.SoundScheduler;
 
 public class OliRenderer {    
     /**
      * The number of frames that have been rendered.
-     * During the render call, this is actually one more than the current rendered frame.
      */
     public static int frameNum = 0;
     
@@ -50,8 +48,6 @@ public class OliRenderer {
                 td.affectedGobject.tween(td, frameNum);
             }
         }
-        
-        ++frameNum;
     }
     
     /**
@@ -63,27 +59,31 @@ public class OliRenderer {
         g.setColor(Color.black);
         g.fillRect(0, 0, Main.WIDTH, Main.HEIGHT);
         
-        String frameCounter = "Frame Monitor: " + String.valueOf(frameNum) + " of " + String.valueOf(frameDur);
-        String secCounter = "Supposed Time: " + String.valueOf((float) frameNum / DimensionHelper.FRAMES_PER_SECOND);
-        String rsCounter = "Real Time: " + String.valueOf((float) (System.currentTimeMillis() - renderStartTime) / 1000);
+        SoundScheduler.checkForPrescheduled(frameNum);
         
-        int fh = GfxHelper.getTextHeight(frameCounter, g.getFontMetrics(), g);
-        
-        FontMetrics fm = g.getFontMetrics();
-        
-        int wid = Math.max(fm.stringWidth(frameCounter), Math.max(fm.stringWidth(secCounter), fm.stringWidth(rsCounter)));
-        
-        g.setColor(Color.black);
-        g.fillRect(0, 0, g.getFontMetrics().stringWidth(frameCounter), fh * 3);
-        
-        g.setColor(Color.cyan);
-        g.drawString(frameCounter, 0, fh);
-        g.drawString(secCounter, 0, fh*2);
-        g.drawString(rsCounter, 0, fh*3);
+        if (Main.isOnscreen) {
+            String frameCounter = "Frame Monitor: " + String.valueOf(frameNum) + " of " + String.valueOf(frameDur-1);
+            String secCounter = "Supposed Time: " + String.valueOf((float) frameNum / DimensionHelper.FRAMES_PER_SECOND);
+            String rsCounter = "Real Time: " + String.valueOf((float) (System.currentTimeMillis() - renderStartTime) / 1000);
+
+            int fh = GfxHelper.getTextHeight(frameCounter, g.getFontMetrics(), g);
+
+            FontMetrics fm = g.getFontMetrics();
+
+            int wid = Math.max(fm.stringWidth(frameCounter), Math.max(fm.stringWidth(secCounter), fm.stringWidth(rsCounter)));
+
+            g.setColor(Color.black);
+            g.fillRect(0, 0, g.getFontMetrics().stringWidth(frameCounter), fh * 3);
+
+            g.setColor(Color.cyan);
+            g.drawString(frameCounter, 0, fh);
+            g.drawString(secCounter, 0, fh*2);
+            g.drawString(rsCounter, 0, fh*3);
+        }
         
         for (Gobject gob: Gobject.ago) {
             if (gob.opacity > 0.0) {
-                BufferedImage bi = new BufferedImage(Main.WIDTH, Main.HEIGHT, BufferedImage.TYPE_INT_ARGB);
+                BufferedImage bi = new BufferedImage(DimensionHelper.RESOLUTION_WIDTH, DimensionHelper.RESOLUTION_HEIGHT, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D gbi = bi.createGraphics();
                 setupHints(gbi);
                 gob.draw(gbi);
@@ -91,5 +91,7 @@ public class OliRenderer {
                 g.drawImage(bi, null, 0, 0);
             }
         }
+        
+        ++frameNum;
     }
 }

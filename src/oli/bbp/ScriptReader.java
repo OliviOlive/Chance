@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import oli.bbp.gfx.OliRenderer;
 import oli.bbp.gfx.TweenDeclaration;
@@ -18,9 +19,12 @@ import oli.bbp.gfx.gobj.ImageGobject;
 import oli.bbp.gfx.gobj.ParticleSimGobject;
 import oli.bbp.gfx.gobj.RectGobject;
 import oli.bbp.gfx.gobj.TextGobject;
+import oli.bbp.sfx.SoundScheduler;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import wavfile.WavFile;
+import wavfile.WavFileException;
 
 /**
  *
@@ -87,7 +91,15 @@ public class ScriptReader {
         }
     }
     
-    public static void parseScript(File scriptFile) throws ScriptFormatException, FileNotFoundException, IOException {
+    public static void verifyWaveFile(File waveFile) throws IOException, WavFileException {
+        WavFile wf = WavFile.openWavFile(waveFile);
+        if ((int) wf.getSampleRate() != (int) SoundScheduler.sampleRate) {
+            log.log(Level.WARNING, "Defined Rate: {0}, In Track {2}: {1}", new Object[] { SoundScheduler.sampleRate, wf.getSampleRate(), waveFile.getName() });
+            throw new ScriptFormatException("Sorry, but an input track must have the same sample rate as defined in the script file");
+        }
+    }
+    
+    public static void parseScript(File scriptFile) throws ScriptFormatException, FileNotFoundException, IOException, WavFileException {
         FileInputStream fis = new FileInputStream(scriptFile);
         jo = new JSONObject(new JSONTokener(fis));
 
@@ -102,14 +114,22 @@ public class ScriptReader {
             throw new ScriptFormatException("Missing 'tween' section.");
         }
         
+        SoundScheduler.sampleRate = jo.getInt("soundSampleRate");
+        SoundScheduler.sampleLen = (int) jo.getDouble("duration") * SoundScheduler.sampleRate;
+        
         if (jo.has("resources")) {
             JSONObject resjo = jo.getJSONObject("resources");
             for (Object tkey: resjo.keySet()) {
                 String skey = (String) tkey;
                 // register the resource
-                File f = new File(resjo.getString(skey));
+                String fn = resjo.getString(skey);
+                File f = new File(fn);
+                if (fn.endsWith(".wav")) {
+                    // verify this wave file
+                    verifyWaveFile(f);
+                }
                 if (! f.exists()) {
-                    log.severe("Resource does not exist on filesystem: " + skey);
+                    log.log(Level.SEVERE, "Resource does not exist on filesystem: {0}", skey);
                 }
                 ScriptReader.resMap.put(skey, f);
             }
@@ -187,6 +207,17 @@ public class ScriptReader {
                 validateTween(td);
                 TweenDeclaration.atd.add(td);
             }
+        }
+        
+        JSONArray ssja = jo.getJSONArray("staticSoundEvents");
+        len = ssja.length();
+        for (int i = 0; i < len; ++i) {
+            JSONArray sseja = ssja.getJSONArray(i);
+            SoundScheduler.playSound(
+                    DimensionHelper.getFramesFromSeconds(sseja.getDouble(0)),
+                    ScriptReader.resMap.get(sseja.getString(1)),
+                    (float) sseja.getDouble(2)
+            );
         }
     }
 }
