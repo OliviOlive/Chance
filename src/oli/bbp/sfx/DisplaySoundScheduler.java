@@ -7,7 +7,6 @@ import java.io.File;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import javax.sound.sampled.FloatControl;
 
 /**
  *
@@ -21,8 +20,8 @@ public class DisplaySoundScheduler extends SoundScheduler {
             AudioInputStream inputStream = AudioSystem.getAudioInputStream(sound);
             c.open(inputStream);
             c.start();
-            FloatControl vol = (FloatControl) c.getControl(FloatControl.Type.VOLUME);
-            vol.setValue(volume);
+            //FloatControl vol = (FloatControl) c.getControl(FloatControl.Type.VOLUME);
+            //vol.setValue(volume);
         } catch (Exception e) { // 'pokémon exception handling'
             e.printStackTrace(System.out);
         }

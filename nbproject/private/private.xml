@@ -5,6 +5,7 @@
         <group>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/sfx/ToFileSoundScheduler.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/sim/Molecule.java</file>
+            <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/wavfile/WavFile.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/sfx/SoundScheduler.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/gfx/gobj/Gobject.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/gfx/gobj/TextGobject.java</file>
@@ -14,6 +15,7 @@
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/Main.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/sfx/DisplaySoundScheduler.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/DimensionHelper.java</file>
+            <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/sfx/AudioMixer.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/gfx/gobj/ParticleSimGobject.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/ScriptReader.java</file>
             <file>file:/home/oliver/dev/theory/java_theory/BillBrysonPrize/src/oli/bbp/sim/MoleculeColourGroup.java</file>
