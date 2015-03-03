@@ -13,7 +13,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import oli.bbp.gfx.OliRenderer;
+import oli.bbp.io.VoidStream;
 import oli.bbp.sfx.DisplaySoundScheduler;
 import oli.bbp.sfx.SoundScheduler;
 import oli.bbp.sfx.ToFileSoundScheduler;
@@ -97,28 +99,53 @@ public class Main {
     }
     
     public static void toFileMode(File directorySave) throws IOException {
-        ToFileSoundScheduler tfss = new ToFileSoundScheduler();
-        SoundScheduler.instance = tfss;
-        
-        while (OliRenderer.frameNum < OliRenderer.frameDur) {
-            String filename = directorySave.getPath() + File.separatorChar + String.format("%8d.png", OliRenderer.frameNum).replace(' ', '0');
-            OliRenderer.preprocessFrame();
-            BufferedImage bi = new BufferedImage(DimensionHelper.RESOLUTION_WIDTH, DimensionHelper.RESOLUTION_HEIGHT, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2d = bi.createGraphics();
-            OliRenderer.setupHints(g2d);
-            OliRenderer.renderFrame(g2d);
-            g2d.dispose();
-            // audio-run ImageIO.write(bi, "png", new File(filename));
-            if (OliRenderer.frameNum % 200 == 0) {
-                log.log(Level.INFO, "Frame: {0}", OliRenderer.frameNum);
+        try {
+            ToFileSoundScheduler tfss = new ToFileSoundScheduler();
+            SoundScheduler.instance = tfss;
+            
+            while (OliRenderer.frameNum < OliRenderer.frameDur) {
+                String filename = directorySave.getPath() + File.separatorChar + String.format("%8d.png", OliRenderer.frameNum).replace(' ', '0');
+                OliRenderer.preprocessFrame();
+                BufferedImage bi = new BufferedImage(DimensionHelper.RESOLUTION_WIDTH, DimensionHelper.RESOLUTION_HEIGHT, BufferedImage.TYPE_INT_RGB);
+                Graphics2D g2d = bi.createGraphics();
+                OliRenderer.setupHints(g2d);
+                OliRenderer.renderFrame(g2d);
+                g2d.dispose();
+                ImageIO.write(bi, "png", new File(filename));
+                if (OliRenderer.frameNum % 200 == 0) {
+                    log.log(Level.INFO, "Frame: {0}", OliRenderer.frameNum);
+                }
             }
+            
+            String outPathS = directorySave.getPath() + File.separatorChar;
+            
+            log.info("Finished frames, starting mixdown.");
+            
+            tfss.mixAndSave(outPathS + "audio.wav");
+            
+            log.info("Finished mixdown.");
+            
+            log.info("Will now attempt to run conversion with avconv");
+            
+            Runtime rt = Runtime.getRuntime();
+            String[] fcmd = new String[]{"avconv", "-r", Integer.toString(DimensionHelper.FRAMES_PER_SECOND), "-y", "-i", "./%08d.png", "-i", "./audio.wav", "-ar", "44100", "-strict", "experimental", "./result.mp4"};
+            String joinD = "";
+            for (String k : fcmd) {
+                joinD += " " + k;
+            }
+            log.log(Level.INFO, "Running:{0}", joinD);
+            Process p = rt.exec(fcmd, null, directorySave);
+            VoidStream vse = new VoidStream(p.getErrorStream());
+            VoidStream vso = new VoidStream(p.getInputStream());
+            vse.start();
+            vso.start(); // we don't want to know about stdout & stderr
+            int errc = p.waitFor();
+            if (errc != 0) {
+                throw new RuntimeException("avconv did not suceed, returned errcode " + errc);
+            }
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        log.info("Finished frames, starting mixdown.");
-        
-        tfss.mixAndSave(directorySave.getPath() + File.separatorChar + "audio.wav");
-        
-        log.info("Finished mixdown.");
     }
     
     /**

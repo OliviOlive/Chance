@@ -19,7 +19,7 @@ public class ParticleSimulator {
     
     public int simWidth, simHeight;
     
-    public double simSpeed = 0.1;
+    public double simSpeed = 0;
     
     public ParticleSimulator(JSONObject config) {
         Object o = config.get("size");
@@ -66,9 +66,7 @@ public class ParticleSimulator {
             }
         }
         
-        if (config.has("speed")) {
-            this.simSpeed = config.getDouble("speed") / DimensionHelper.FRAMES_PER_SECOND;
-        }
+        this.simSpeed = config.optDouble("speed", 3.0) / DimensionHelper.FRAMES_PER_SECOND;
     }
     
     public void update() {
