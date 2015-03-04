@@ -123,7 +123,8 @@ public class ScriptReader {
                 String skey = (String) tkey;
                 // register the resource
                 String fn = resjo.getString(skey);
-                File f = new File(fn);
+                File f = new File(scriptFile.getParentFile(), fn);
+                
                 if (fn.endsWith(".wav")) {
                     // verify this wave file
                     verifyWaveFile(f);

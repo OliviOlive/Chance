@@ -43,7 +43,7 @@ public class TextGobject extends Gobject {
         x = DimensionHelper.getRealDimensions((DimensionHelper.RESOLUTION_WIDTH/2) - (w/2));
         y = DimensionHelper.getRealDimensions((DimensionHelper.RESOLUTION_HEIGHT/2) - (h/2));
         g2d.setColor(this.col);
-        g2d.setBackground(new Color(255, 255, 255));
+        g2d.setFont(font);
         g2d.drawString(this.text, x, y);
     }
     

@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import oli.bbp.DimensionHelper;
 import oli.bbp.ScriptReader;
@@ -21,16 +22,26 @@ public class ImageGobject extends Gobject {
 
     public BufferedImage bi;
     
+    static final Logger log = Logger.getLogger("ImageGobject");
+    
     public ImageGobject(String id, JSONObject ja) throws IOException {
         super(id, ja);
         
-        File imf = new File(ja.optString("src", "__MISSING"));
-        
-        if (! imf.exists()) {
-            throw new ScriptReader.ScriptFormatException("Image File does not exist: " + imf.getAbsolutePath());
+        if (ja.has("src")) {
+            File imf = new File(ja.optString("src", "__MISSING"));
+
+            if (! imf.exists()) {
+                throw new ScriptReader.ScriptFormatException("Image File does not exist: " + imf.getAbsolutePath());
+            }
+            Logger.getLogger("ImageGobject: construction").warning("Warning: ImageGobject.src is deprecated.");
+            
+            bi = ImageIO.read(imf);
+        } else if (ja.has("res")) {
+            File res = ScriptReader.resMap.get(ja.getString("res"));
+            bi = ImageIO.read(res);
+        } else {
+            log.severe("ImageGobject: No res (or deprecated src) attribute. @ " + this);
         }
-        
-        bi = ImageIO.read(imf);
     }
 
     @Override
