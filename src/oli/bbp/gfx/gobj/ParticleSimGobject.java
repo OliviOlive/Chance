@@ -283,9 +283,11 @@ public class ParticleSimGobject extends Gobject {
             // is not noticed. This way, simulations will run at the same
             // perceived speed at different framerates.
             accumTicks += simSpeed / DimensionHelper.FRAMES_PER_SECOND;
+            boolean updateHistory = true;
             while (accumTicks >= 1) {
                 accumTicks--;
-                psim.update();
+                psim.update(updateHistory);
+                updateHistory = false;
             }
             
             if (this.timeMonitor != null) {
@@ -321,6 +323,47 @@ public class ParticleSimGobject extends Gobject {
             }
             DuplicationDestinationGobject ddgo = (DuplicationDestinationGobject) go;
             ddgo.supersede(psgo);
+        }
+        
+        if (td.affectedProperty.equals("reverseVectors")) {
+            for (Molecule mol : psim.mols) {
+                mol.momentum.reverseX();
+                mol.momentum.reverseY();
+            }
+        }
+        
+        if (td.affectedProperty.equals("isimulate")) {
+            // an instant simulation
+            // if parameter is negative, this is a de-simulation (experimental)
+            int cycles = td.json.getInt(0);
+            boolean desim = cycles < 0;
+            
+            boolean preserveTime = td.json.getBoolean(1);
+            long timePreserve = psim.simTime;
+            
+            if (desim) {
+                cycles = -cycles;
+                for (Molecule mol : psim.mols) {
+                    mol.momentum.reverseX();
+                    mol.momentum.reverseY();
+                }
+            }
+            
+            for (int i = 0; i < cycles; ++i) {
+                psim.update(true);
+            }
+            
+            if (preserveTime) {
+                psim.simTime = timePreserve;
+            }
+            
+            if (desim) {
+                for (Molecule mol : psim.mols) {
+                    mol.momentum.reverseX();
+                    mol.momentum.reverseY();
+                    mol.oldBasis = new MolVector2D(mol.basis);
+                }
+            }
         }
         
         common(td, frameNum);

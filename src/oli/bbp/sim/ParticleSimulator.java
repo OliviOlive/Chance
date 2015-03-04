@@ -69,11 +69,13 @@ public class ParticleSimulator {
         }
     }
     
-    public void update() {
+    public void update(boolean shouldUpdateOldBasis) {
         for (int moli = 0; moli < molCount; ++moli) {
             Molecule mol = mols[moli];
             
-            mol.oldBasis = new Molecule.MolVector2D(mol.basis);
+            if (shouldUpdateOldBasis) {
+                mol.oldBasis = new Molecule.MolVector2D(mol.basis);
+            }
             
             mol.basis.add(mol.momentum.scale(NORMAL_SCALAR));
             
