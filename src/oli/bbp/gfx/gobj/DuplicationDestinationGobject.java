@@ -22,7 +22,9 @@ public class DuplicationDestinationGobject extends Gobject {
 
     @Override
     public void draw(Graphics2D g2d) {
-        throw new UnsupportedOperationException("DuplicationDestinationGobject cannot be drawn, until they are replaced. Fix this issue within your script. Note: To avoid a Gobject from being drawn, set its opacity to 0!");
+        if (supersededBy == null)
+            throw new UnsupportedOperationException("DuplicationDestinationGobject cannot be drawn, until they are replaced. Fix this issue within your script. Note: To avoid a Gobject from being drawn, set its opacity to 0!");
+        this.supersededBy.draw(g2d);
     }
     
     /**
@@ -31,6 +33,7 @@ public class DuplicationDestinationGobject extends Gobject {
      */
     public void supersede(Gobject by) {
         supersededBy = by;
+        supersededBy.bounds = this.bounds;
     }
     
     @Override
@@ -39,6 +42,8 @@ public class DuplicationDestinationGobject extends Gobject {
             throw new UnsupportedOperationException("DuplicationDestinationGobject cannot handle tweens, until they are replaced. Fix this issue within your script.");
         
         supersededBy.tween(td, frameNum);
+        
+        this.opacity = supersededBy.opacity; // pretty important
     }
     
     @Override
@@ -47,6 +52,8 @@ public class DuplicationDestinationGobject extends Gobject {
             throw new UnsupportedOperationException("DuplicationDestinationGobject cannot handle instant changes, until they are replaced. Fix this issue within your script.");
         
         supersededBy.instantChange(td, frameNum);
+        
+        this.opacity = supersededBy.opacity; // pretty important
     }
     
 }

@@ -10,8 +10,10 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.util.logging.Level;
 import oli.bbp.DimensionHelper;
 import oli.bbp.Main;
+import oli.bbp.gfx.gobj.DuplicationDestinationGobject;
 import oli.bbp.gfx.gobj.Gobject;
 import oli.bbp.sfx.SoundScheduler;
 
@@ -83,6 +85,9 @@ public class OliRenderer {
         
         for (Gobject gob: Gobject.ago) {
             if (gob.opacity > 0.0) {
+                if (gob instanceof DuplicationDestinationGobject) {
+                    Main.log.log(Level.INFO, "{0} {1}", new Object[]{gob.toString(), gob.opacity});
+                }
                 BufferedImage bi = new BufferedImage(DimensionHelper.RESOLUTION_WIDTH, DimensionHelper.RESOLUTION_HEIGHT, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D gbi = bi.createGraphics();
                 setupHints(gbi);

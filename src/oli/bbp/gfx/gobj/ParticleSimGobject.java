@@ -10,7 +10,9 @@ import java.awt.Graphics2D;
 import java.awt.MultipleGradientPaint.CycleMethod;
 import java.awt.RadialGradientPaint;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import oli.bbp.DimensionHelper;
 import oli.bbp.ScriptReader;
@@ -125,6 +127,29 @@ public class ParticleSimGobject extends Gobject {
                 DimensionHelper.getRealDimensions(this.bounds.height)
         );
         
+        /* Precision errors mean that they were rounded to 0...
+        therefore, will use BigDecimal
+        double xMod = this.bounds.width / psim.simWidth;
+        double yMod = this.bounds.height / psim.simHeight;
+        */
+        
+        BigDecimal xMod = new BigDecimal(this.bounds.width).divide(new BigDecimal(psim.simWidth));
+        BigDecimal yMod = new BigDecimal(this.bounds.height).divide(new BigDecimal(psim.simHeight));
+        
+        BigDecimal downscale = new BigDecimal(DimensionHelper.DOWNSCALE);
+        
+        xMod = xMod.multiply(downscale);
+        yMod = yMod.multiply(downscale);
+        
+        // get the transformation matrix so we can restore it later
+        AffineTransform restoreAT = g2d.getTransform();
+        
+        // translate so that 0,0 is 0,0 of the gobject
+        g2d.translate(DimensionHelper.getRealDimensions(this.bounds.x), DimensionHelper.getRealDimensions(this.bounds.y));
+        
+        // scale so that dimensions match virtual, in-simulator dimensions;
+        g2d.scale(xMod.doubleValue(), yMod.doubleValue());
+        
         if (this.showHistory) { // draw history in transparent layer!
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, this.historyOpacity));
             for (int moli = 0; moli < psim.molCount; ++moli) {
@@ -135,13 +160,13 @@ public class ParticleSimGobject extends Gobject {
                 
                 g2d.setPaint(new RadialGradientPaint(
                         new Point2D.Float(
-                                DimensionHelper.getRealDimensions((float) (this.bounds.x + m.oldBasis.x)),
-                                DimensionHelper.getRealDimensions((float) (this.bounds.y + m.oldBasis.y))
+                                (float) m.oldBasis.x,
+                                (float) m.oldBasis.y
                         ),
                         m.radius,
                         new Point2D.Float(
-                                DimensionHelper.getRealDimensions((float) (this.bounds.x + m.oldBasis.x + m.radius / 2)),
-                                DimensionHelper.getRealDimensions((float) (this.bounds.y + m.oldBasis.y - m.radius / 2))
+                                (float) m.oldBasis.x + m.radius / 2,
+                                (float) m.oldBasis.y - m.radius / 2
                         ),
                         new float[]{0f, 0.8f, 1f},
                         new Color[]{
@@ -152,10 +177,10 @@ public class ParticleSimGobject extends Gobject {
                         CycleMethod.NO_CYCLE
                 ));
                 g2d.fillArc(
-                        DimensionHelper.getRealDimensions((int) (this.bounds.x + m.oldBasis.x) - m.radius),
-                        DimensionHelper.getRealDimensions((int) (this.bounds.y + m.oldBasis.y) - m.radius),
-                        DimensionHelper.getRealDimensions(2 * m.radius),
-                        DimensionHelper.getRealDimensions(2 * m.radius),
+                        (int) m.oldBasis.x - m.radius,
+                        (int) m.oldBasis.y - m.radius,
+                        2 * m.radius,
+                        2 * m.radius,
                         0, 360
                 );
             }
@@ -170,13 +195,13 @@ public class ParticleSimGobject extends Gobject {
             
             g2d.setPaint(new RadialGradientPaint(
                     new Point2D.Float(
-                            DimensionHelper.getRealDimensions((float) (this.bounds.x + m.basis.x)),
-                            DimensionHelper.getRealDimensions((float) (this.bounds.y + m.basis.y))
+                            (float) m.basis.x,
+                            (float) m.basis.y
                     ),
                     m.radius,
                     new Point2D.Float(
-                            DimensionHelper.getRealDimensions((float) (this.bounds.x + m.basis.x + m.radius / 2)),
-                            DimensionHelper.getRealDimensions((float) (this.bounds.y + m.basis.y - m.radius / 2))
+                            (float) m.basis.x + m.radius / 2,
+                            (float) m.basis.y - m.radius / 2
                     ),
                     new float[]{0f, 0.8f, 1f},
                     new Color[]{
@@ -187,10 +212,10 @@ public class ParticleSimGobject extends Gobject {
                     CycleMethod.NO_CYCLE
             ));
             g2d.fillArc(
-                    DimensionHelper.getRealDimensions((int) (this.bounds.x + m.basis.x) - m.radius),
-                    DimensionHelper.getRealDimensions((int) (this.bounds.y + m.basis.y) - m.radius),
-                    DimensionHelper.getRealDimensions(2 * m.radius),
-                    DimensionHelper.getRealDimensions(2 * m.radius),
+                    (int) m.basis.x - m.radius,
+                    (int) m.basis.y - m.radius,
+                    2 * m.radius,
+                    2 * m.radius,
                     0, 360
             );
         }
@@ -214,15 +239,18 @@ public class ParticleSimGobject extends Gobject {
                 
                 GfxHelper.drawArrow(
                         g2d,
-                        DimensionHelper.getRealDimensions((int) (this.bounds.x + m.basis.x)),
-                        DimensionHelper.getRealDimensions((int) (this.bounds.y + m.basis.y)),
-                        DimensionHelper.getRealDimensions((int) (this.bounds.x + mv2d.x)),
-                        DimensionHelper.getRealDimensions((int) (this.bounds.y + mv2d.y))
+                        (int) m.basis.x,
+                        (int) m.basis.y,
+                        (int) mv2d.x,
+                        (int) mv2d.y
                 );
             }
             
             g2d.setStroke(restoreStroke);
         }
+        
+        // restore the Transformation Matrix
+        g2d.setTransform(restoreAT);
     }
     
     public void common(TweenDeclaration td, int frameNum) {
@@ -292,7 +320,7 @@ public class ParticleSimGobject extends Gobject {
                 throw new ScriptFormatException(this, "Replacee must be of 'dd' type.");
             }
             DuplicationDestinationGobject ddgo = (DuplicationDestinationGobject) go;
-            
+            ddgo.supersede(psgo);
         }
         
         common(td, frameNum);

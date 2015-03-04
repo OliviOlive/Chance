@@ -26,7 +26,7 @@ import oli.bbp.sfx.ToFileSoundScheduler;
  */
 public class Main {
     
-    private static final Logger log = Logger.getLogger( Main.class.getName() );
+    public static final Logger log = Logger.getLogger( Main.class.getName() );
     
     public static boolean isOnscreen = false;
     public static GraphicsEnvironment genv;
