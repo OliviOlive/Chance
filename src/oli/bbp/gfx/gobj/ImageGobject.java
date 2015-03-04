@@ -3,11 +3,11 @@
  */
 package oli.bbp.gfx.gobj;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import oli.bbp.DimensionHelper;
@@ -40,7 +40,7 @@ public class ImageGobject extends Gobject {
             File res = ScriptReader.resMap.get(ja.getString("res"));
             bi = ImageIO.read(res);
         } else {
-            log.severe("ImageGobject: No res (or deprecated src) attribute. @ " + this);
+            log.log(Level.SEVERE, "ImageGobject: No res (or deprecated src) attribute. @ {0}", this);
         }
     }
 

@@ -19,7 +19,9 @@ public class ParticleSimulator {
     
     public int simWidth, simHeight;
     
-    public double simSpeed = 0;
+    public long simTime;
+    
+    public static float NORMAL_SCALAR = 0.1F;
     
     public ParticleSimulator(JSONObject config) {
         Object o = config.get("size");
@@ -65,8 +67,6 @@ public class ParticleSimulator {
                 );
             }
         }
-        
-        this.simSpeed = config.optDouble("speed", 3.0) / DimensionHelper.FRAMES_PER_SECOND;
     }
     
     public void update() {
@@ -75,7 +75,7 @@ public class ParticleSimulator {
             
             mol.oldBasis = new Molecule.MolVector2D(mol.basis);
             
-            mol.basis.add(mol.momentum.scale(simSpeed));
+            mol.basis.add(mol.momentum.scale(NORMAL_SCALAR));
             
             boolean bouncedOnWall = false;
             
@@ -194,6 +194,8 @@ public class ParticleSimulator {
                 }
             }
         }
+        
+        ++simTime;
     }
     
     public Molecule getCollisionForMolecule(Molecule mol) {

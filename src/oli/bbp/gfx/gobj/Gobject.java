@@ -61,6 +61,15 @@ public abstract class Gobject {
         }
     }
     
+    // blank
+    public Gobject() {
+        
+    }
+    
+    public void postConstruct() {
+        
+    }
+    
     /**
      * Adjusts properties of the Gobject to meet tweening specifications.
      * @param td

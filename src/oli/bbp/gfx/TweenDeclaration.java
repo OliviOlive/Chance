@@ -4,6 +4,7 @@
 package oli.bbp.gfx;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 import oli.bbp.gfx.gobj.Gobject;
 import org.json.JSONArray;
 
@@ -37,5 +38,87 @@ public class TweenDeclaration {
     @Override
     public String toString() {
         return "TweenDeclaration(" + this.affectedGobject + " " + this.affectedProperty + " at " + this.startFrame + " until " + this.endFrame + ")";
+    }
+    
+    public static class TweenSimpleHandlers {
+        public static int simpleUpdateField(String propName, TweenDeclaration td, int nowVal) {
+            if (! td.affectedProperty.equals(propName)) return nowVal;
+            if (td.endFrame == null) {
+                if (td.startFrame == OliRenderer.frameNum) {
+                    return td.json.getInt(0);
+                } else {
+                    return nowVal;                    
+                }
+            }
+            
+            if (td.startFrame == OliRenderer.frameNum) { // first frame
+                // store initial value
+                td.gobmem.add(nowVal);
+                
+                // store gradient
+                td.gobmem.add((double) (td.json.getDouble(0) - nowVal) / (td.endFrame - td.startFrame));
+            }
+            
+            return (int) Math.floor((double) td.gobmem.get(0) + ((double) td.gobmem.get(1) * OliRenderer.frameNum - td.startFrame));
+        }
+        
+        public static float simpleUpdateField(String propName, TweenDeclaration td, float nowVal) {
+            if (! td.affectedProperty.equals(propName)) return nowVal;
+            if (td.endFrame == null) {
+                if (td.startFrame == OliRenderer.frameNum) {
+                    return (float) td.json.getDouble(0);
+                } else {
+                    return nowVal;
+                }
+            }
+            
+            if (td.startFrame == OliRenderer.frameNum) { // first frame
+                // store initial value
+                td.gobmem.add(nowVal);
+                
+                // store gradient
+                td.gobmem.add((float) (td.json.getDouble(0) - nowVal) / (td.endFrame - td.startFrame));
+            }
+            
+            return (float) td.gobmem.get(0) + ((float) td.gobmem.get(1) * OliRenderer.frameNum - td.startFrame);
+        }
+        
+        public static double simpleUpdateField(String propName, TweenDeclaration td, double nowVal) {
+            if (! td.affectedProperty.equals(propName)) return nowVal;
+            if (td.endFrame == null) {
+                if (td.startFrame == OliRenderer.frameNum) {
+                    return td.json.getDouble(0);
+                } else {
+                    return nowVal;
+                }
+            }
+            
+            if (td.startFrame == OliRenderer.frameNum) { // first frame
+                // store initial value
+                td.gobmem.add(nowVal);
+                
+                // store gradient
+                td.gobmem.add((double) (td.json.getDouble(0) - nowVal) / (td.endFrame - td.startFrame));
+            }
+            
+            return (double) td.gobmem.get(0) + ((double) td.gobmem.get(1) * OliRenderer.frameNum - td.startFrame);
+        }
+        
+        public static boolean simpleBooleanField(String propName, TweenDeclaration td, boolean nowVal) {
+            if (! td.affectedProperty.equals(propName)) {
+                return nowVal;
+            }
+            
+            if (td.endFrame != null) {
+                Logger.getLogger(td.toString()).warning("Ignored Tween. Boolean properties cannot be tweened, only set by instant changes.");
+                return nowVal;
+            }
+            
+            if (td.startFrame == OliRenderer.frameNum) {
+                return td.json.getBoolean(0);
+            } else {
+                return nowVal;
+            }
+        }
     }
 }

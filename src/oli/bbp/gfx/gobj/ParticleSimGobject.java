@@ -14,6 +14,7 @@ import java.awt.geom.Point2D;
 import java.util.HashMap;
 import oli.bbp.DimensionHelper;
 import oli.bbp.ScriptReader;
+import oli.bbp.ScriptReader.ScriptFormatException;
 import oli.bbp.gfx.GfxHelper;
 import oli.bbp.gfx.TweenDeclaration;
 import oli.bbp.sim.Molecule;
@@ -33,14 +34,21 @@ public class ParticleSimGobject extends Gobject {
     
     boolean showHistory;
     boolean showVectors;
-    boolean showTime;
     
     float historyOpacity;
     float vectorWidth;
     float vectorScalar;
     
+    double simSpeed;
+    double accumTicks = 0;
+    
     Color borderCol;
     Color vectorCol;
+    
+    String timeMonitor_id;
+    TextGobject timeMonitor;
+    int timeMonitor_dp;
+    double timeMonitor_divisor;
     
     public static HashMap<String, MoleculeColourGroup> molcgs = new HashMap<>();
     
@@ -49,12 +57,13 @@ public class ParticleSimGobject extends Gobject {
         
         showHistory = jo.optBoolean("showHistory", true);
         showVectors = jo.optBoolean("showVectors", false);
-        showTime = jo.optBoolean("showTime", true);
         
         historyOpacity = (float) jo.optDouble("historyOpacity", 0.4);
         vectorWidth = (float) jo.optDouble("drawnVectorWidth", 3.0);
         vectorScalar = (float) jo.optDouble("drawnVectorScalar", 30.0);
         vectorCol = ScriptReader.strToColour(jo.optString("drawnVectorColour", "#ffffff"));
+        
+        simSpeed = jo.optDouble("simSpeed", 300.0);
         
         borderCol = ScriptReader.strToColour(jo.optString("borderColour", "#ffffff"));
         
@@ -76,14 +85,38 @@ public class ParticleSimGobject extends Gobject {
             }
         }
         
+        if (jo.has("timeMonitor")) {
+            JSONArray tja = jo.getJSONArray("timeMonitor");
+            this.timeMonitor_id = tja.getString(0);
+            
+            timeMonitor_dp = tja.optInt(1, 3);
+            timeMonitor_divisor = tja.optDouble(2, simSpeed);
+        }
+        
         psim = new ParticleSimulator(jo.getJSONObject("simulator"));
         
     }
 
+    private ParticleSimGobject() {
+        
+    }
+    
+    @Override
+    public void postConstruct() {
+        if (this.timeMonitor_id != null) {
+            Gobject go = Gobject.getGobjectById(this.timeMonitor_id);
+            if (go == null) {
+                throw new ScriptFormatException(this, "timeMonitor[0] must be the name of a TextGobject already initialised. Re-order your Gobjects if necessary.");
+            }
+            if (! (go instanceof TextGobject)) {
+                throw new ScriptFormatException(this, "timeMonitor[0] must be the name of a TextGobject. Any old Gobject will not just do.");
+            }
+            this.timeMonitor = (TextGobject) go;
+        }
+    }
+
     @Override
     public void draw(Graphics2D g2d) {
-        psim.update();
-        
         g2d.setColor(this.borderCol);
         g2d.drawRect(
                 DimensionHelper.getRealDimensions(this.bounds.x),
@@ -192,14 +225,77 @@ public class ParticleSimGobject extends Gobject {
         }
     }
     
+    public void common(TweenDeclaration td, int frameNum) {
+        this.simSpeed = TweenDeclaration.TweenSimpleHandlers.simpleUpdateField(
+                "simSpeed", td, this.simSpeed
+        );
+        
+        this.vectorWidth = TweenDeclaration.TweenSimpleHandlers.simpleUpdateField(
+                "drawnVectorWidth", td, this.vectorWidth
+        );
+        
+        this.vectorScalar = TweenDeclaration.TweenSimpleHandlers.simpleUpdateField(
+                "drawnVectorScalar", td, this.vectorScalar
+        );
+        
+        this.showVectors = TweenDeclaration.TweenSimpleHandlers.simpleBooleanField(
+                "shownVectors", td, this.showVectors                
+        );
+    }
+    
     @Override
     public void tween(TweenDeclaration td, int frameNum) {
         super.tween(td, frameNum);
+        
+        common(td, frameNum);
+        
+        if (td.affectedProperty.equals("simulate")) {
+            // because there may be a decimal result returned,
+            // ticks should 'accumulate' so that hopefully the difference
+            // is not noticed. This way, simulations will run at the same
+            // perceived speed at different framerates.
+            accumTicks += simSpeed / DimensionHelper.FRAMES_PER_SECOND;
+            while (accumTicks >= 1) {
+                accumTicks--;
+                psim.update();
+            }
+            
+            if (this.timeMonitor != null) {
+                // update the time monitor
+                double timeVal = (double) psim.simTime / timeMonitor_divisor;
+                double dpPow = Math.pow(10, timeMonitor_dp);
+                String timeRep = Double.toString(Math.floor(timeVal * dpPow) / dpPow);
+                this.timeMonitor.text = timeRep;
+            }
+        }
     }
     
     @Override
     public void instantChange(TweenDeclaration td, int frameNum) {
         super.instantChange(td, frameNum);
+        
+        if ("dupe".equals(td.affectedProperty)) {
+            // duplicate this Gobject -- but keep the same ParticleSimulator
+            // this allows the showing of multiple viewports, or the fading in and out
+            // of vector arrows, etc
+            ParticleSimGobject psgo = new ParticleSimGobject();
+            psgo.borderCol = this.borderCol;
+            psgo.historyOpacity = this.historyOpacity;
+            psgo.psim = this.psim;
+            psgo.showHistory = this.showHistory;
+            psgo.showVectors = this.showVectors;
+            psgo.vectorCol = this.vectorCol;
+            psgo.vectorScalar = this.vectorScalar;
+            psgo.vectorWidth = this.vectorWidth;
+            Gobject go = Gobject.getGobjectById(td.json.getString(0));
+            if (! (go instanceof DuplicationDestinationGobject)) {
+                throw new ScriptFormatException(this, "Replacee must be of 'dd' type.");
+            }
+            DuplicationDestinationGobject ddgo = (DuplicationDestinationGobject) go;
+            
+        }
+        
+        common(td, frameNum);
     }
     
 }

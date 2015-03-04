@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import oli.bbp.gfx.OliRenderer;
 import oli.bbp.gfx.TweenDeclaration;
+import oli.bbp.gfx.gobj.DuplicationDestinationGobject;
 import oli.bbp.gfx.gobj.Gobject;
 import oli.bbp.gfx.gobj.ImageGobject;
 import oli.bbp.gfx.gobj.ParticleSimGobject;
@@ -56,7 +57,7 @@ public class ScriptReader {
     }
     
     public static JSONObject jo;
-    private static final Logger log = Logger.getLogger(Main.class.getName());
+    public static final Logger log = Logger.getLogger(Main.class.getName());
     
     public static HashMap<String, File> resMap = new HashMap<>();
     
@@ -160,6 +161,9 @@ public class ScriptReader {
                 case "parsim":
                     Gobject.ago.add(new ParticleSimGobject(key, val));
                 break;
+                case "dd":
+                    Gobject.ago.add(new DuplicationDestinationGobject(key, val));
+                break;
                 default:
                     throw new ScriptFormatException("Unknown Gobject type: " + val.getString("type"));
             }
@@ -219,6 +223,10 @@ public class ScriptReader {
                     ScriptReader.resMap.get(sseja.getString(1)),
                     (float) sseja.getDouble(2)
             );
+        }
+        
+        for (Gobject gob : Gobject.ago) {
+            gob.postConstruct();
         }
     }
 }
