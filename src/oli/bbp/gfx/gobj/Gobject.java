@@ -59,6 +59,7 @@ public abstract class Gobject {
         if (ja.has("z-index")) {
             this.zIndex = ja.getInt("z-index");
         }
+        this.opacity = (float) ja.optDouble("opacity", 0.0);
     }
     
     // blank

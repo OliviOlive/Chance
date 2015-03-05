@@ -9,11 +9,11 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.RenderingHints.Key;
 import java.awt.image.BufferedImage;
-import java.util.logging.Level;
+import java.util.HashMap;
 import oli.bbp.DimensionHelper;
 import oli.bbp.Main;
-import oli.bbp.gfx.gobj.DuplicationDestinationGobject;
 import oli.bbp.gfx.gobj.Gobject;
 import oli.bbp.sfx.SoundScheduler;
 
@@ -30,10 +30,16 @@ public class OliRenderer {
     
     public static long renderStartTime;
     
+    public static final RenderingHints hints = new RenderingHints(new HashMap<Key, Object>());
+    
+    static {
+        hints.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        hints.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        hints.put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    }
+    
     public static void setupHints(Graphics2D g2d) {
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHints(hints);
     }
     
     /**
@@ -85,9 +91,6 @@ public class OliRenderer {
         
         for (Gobject gob: Gobject.ago) {
             if (gob.opacity > 0.0) {
-                if (gob instanceof DuplicationDestinationGobject) {
-                    Main.log.log(Level.INFO, "{0} {1}", new Object[]{gob.toString(), gob.opacity});
-                }
                 BufferedImage bi = new BufferedImage(DimensionHelper.RESOLUTION_WIDTH, DimensionHelper.RESOLUTION_HEIGHT, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D gbi = bi.createGraphics();
                 setupHints(gbi);
