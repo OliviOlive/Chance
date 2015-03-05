@@ -10,8 +10,12 @@ It is highly possible that documentation will never be published for this softwa
 
 ## Limitations
 
+##### Audio
 - All audio files must have the same sample rate (this program features an 'in-house' audio mixer, which is very primitive).
-- All audio files must be supported by the standard javax.sound library, through built-in support or otherwise, plugins.
+- Only Wave files are supported.
+
+##### Configuration
+- Comments are not supported, as the JSON spec doesn't support them and I have not yet implemented another syntax. (looking at HOCON..)
 
 ## Dependencies
 
