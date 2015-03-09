@@ -80,7 +80,7 @@ public class ParticleSimGobject extends Gobject {
         
         borderCol = ScriptReader.strToColour(jo.optString("borderColour", "#ffffff"));
         
-        historyPeriod = DimensionHelper.getFramesFromSeconds(jo.optDouble("historyPeriod", 1.0));
+        historyPeriod = Math.max(1, DimensionHelper.getFramesFromSeconds(jo.optDouble("historyPeriod", 0.05)));
         
         if (! jo.has("simulator")) {
             throw new ScriptReader.ScriptFormatException(this, "No simulator parameter passed. Unable to instantiate ParticleSimulator.");
@@ -305,12 +305,11 @@ public class ParticleSimGobject extends Gobject {
             // is not noticed. This way, simulations will run at the same
             // perceived speed at different framerates.
             accumTicks += simSpeed / DimensionHelper.FRAMES_PER_SECOND;
+            historyQueue.addLast(new ParticleSimStateSave.HistorySave(psim));
             while (accumTicks >= 1) {
                 accumTicks--;
                 psim.update();
             }
-            
-            historyQueue.addLast(new ParticleSimStateSave.HistorySave(psim));
             
             if (this.timeMonitor != null) {
                 // update the time monitor
