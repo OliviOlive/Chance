@@ -3,8 +3,6 @@
  */
 package oli.bbp.sim;
 
-import java.awt.Color;
-
 /**
  *
  * @author oliver
@@ -62,8 +60,6 @@ public class Molecule {
     public MolVector2D basis;
     public MolVector2D momentum;
     
-    public MolVector2D oldBasis;
-    
     public double kineticEnergy, velocity;
     public int radius, mass;
     
@@ -75,5 +71,13 @@ public class Molecule {
         this.radius = radius;
         this.mass = mass;
         this.colGroup = colGroup;
+    }
+    
+    public Molecule(Molecule clone) {
+        this.basis = clone.basis.scale(1);
+        this.momentum = clone.momentum.scale(1);
+        this.radius = clone.radius;
+        this.mass = clone.radius;
+        this.colGroup = clone.colGroup;
     }
 }

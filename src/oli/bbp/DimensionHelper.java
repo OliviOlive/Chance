@@ -15,8 +15,9 @@ public class DimensionHelper {
     public static final int FRAMES_PER_SECOND = Integer.parseInt(System.getProperty("olibbp.framerate", "30"));
     
     // downscale from production resolution to display resolution
-    public static final double DOWNSCALE = 0.666666;
+    private static final double DOWNSCALE = 0.666666;
     
+    public static double CURRENT_DOWNSCALE = DOWNSCALE;
     
     
     public static int getOf(Object in, int of) {

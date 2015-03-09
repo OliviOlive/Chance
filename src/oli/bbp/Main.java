@@ -36,7 +36,7 @@ public class Main {
     
     public static final int WIDTH = 1280;
     public static final int HEIGHT = 720;
-    public static final int REPORT_EVERY_FRAMES = 600;
+    public static final int REPORT_EVERY_FRAMES = 50;
     public static final int DIGITS_FRAMES = 6;
     
     public static void onScreenMode() {
@@ -103,6 +103,8 @@ public class Main {
             ToFileSoundScheduler tfss = new ToFileSoundScheduler();
             SoundScheduler.instance = tfss;
             
+            DimensionHelper.CURRENT_DOWNSCALE = 1.0;
+            
             while (OliRenderer.frameNum < OliRenderer.frameDur) {
                 String filename = directorySave.getPath() + File.separatorChar + String.format("%8d.png", OliRenderer.frameNum).replace(' ', '0');
                 OliRenderer.preprocessFrame();
@@ -112,7 +114,7 @@ public class Main {
                 OliRenderer.renderFrame(g2d);
                 g2d.dispose();
                 ImageIO.write(bi, "png", new File(filename));
-                if (OliRenderer.frameNum % 200 == 0) {
+                if (OliRenderer.frameNum % REPORT_EVERY_FRAMES == 0) {
                     log.log(Level.INFO, "Frame: {0}", OliRenderer.frameNum);
                 }
             }
@@ -142,6 +144,15 @@ public class Main {
             int errc = p.waitFor();
             if (errc != 0) {
                 throw new RuntimeException("avconv did not suceed, returned errcode " + errc);
+            } else {
+                log.log(Level.INFO, "Cleaning up...");
+                for (int i = 0; i < OliRenderer.frameDur; ++i) {
+                    String filename = directorySave.getPath() + File.separatorChar + String.format("%8d.png", i).replace(' ', '0');
+                    new File(filename).delete(); // could use deleteOnExit instead, but nah, might cause issues with many frames
+                }
+                new File(outPathS + "audio.wav").delete();
+
+                log.log(Level.INFO, "Cleaned up!");
             }
         } catch (InterruptedException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);

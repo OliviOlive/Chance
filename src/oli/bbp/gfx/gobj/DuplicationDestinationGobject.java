@@ -41,6 +41,11 @@ public class DuplicationDestinationGobject extends Gobject {
         if (supersededBy == null)
             throw new UnsupportedOperationException("DuplicationDestinationGobject cannot handle tweens, until they are replaced. Fix this issue within your script.");
         
+        if (td.affectedProperty.equals("free")) {
+            this.supersededBy = null;
+            return;
+        }
+        
         supersededBy.tween(td, frameNum);
         
         this.opacity = supersededBy.opacity; // pretty important

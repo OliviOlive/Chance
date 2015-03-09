@@ -13,6 +13,7 @@ import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.math.BigDecimal;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import oli.bbp.DimensionHelper;
 import oli.bbp.ScriptReader;
@@ -22,6 +23,9 @@ import oli.bbp.gfx.TweenDeclaration;
 import oli.bbp.sim.Molecule;
 import oli.bbp.sim.Molecule.MolVector2D;
 import oli.bbp.sim.MoleculeColourGroup;
+import oli.bbp.sim.ParticleSimStateSave;
+import oli.bbp.sim.ParticleSimStateSave.HistorySave;
+import oli.bbp.sim.ParticleSimStateSave.HistorySave.OldMolecule;
 import oli.bbp.sim.ParticleSimulator;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -33,6 +37,11 @@ import org.json.JSONObject;
 public class ParticleSimGobject extends Gobject {
     
     ParticleSimulator psim;
+    
+    /**
+     * A queue of (FPS) elements for showing the position of a molecule 1sec ago
+     */
+    ArrayDeque<ParticleSimStateSave.HistorySave> historyQueue = new ArrayDeque<>();
     
     boolean showHistory;
     boolean showVectors;
@@ -52,6 +61,8 @@ public class ParticleSimGobject extends Gobject {
     int timeMonitor_dp;
     double timeMonitor_divisor;
     
+    int historyPeriod;
+    
     public static HashMap<String, MoleculeColourGroup> molcgs = new HashMap<>();
     
     public ParticleSimGobject(String id, JSONObject jo) {
@@ -68,6 +79,8 @@ public class ParticleSimGobject extends Gobject {
         simSpeed = jo.optDouble("simSpeed", 300.0);
         
         borderCol = ScriptReader.strToColour(jo.optString("borderColour", "#ffffff"));
+        
+        historyPeriod = DimensionHelper.getFramesFromSeconds(jo.optDouble("historyPeriod", 1.0));
         
         if (! jo.has("simulator")) {
             throw new ScriptReader.ScriptFormatException(this, "No simulator parameter passed. Unable to instantiate ParticleSimulator.");
@@ -136,7 +149,7 @@ public class ParticleSimGobject extends Gobject {
         BigDecimal xMod = new BigDecimal(this.bounds.width).divide(new BigDecimal(psim.simWidth));
         BigDecimal yMod = new BigDecimal(this.bounds.height).divide(new BigDecimal(psim.simHeight));
         
-        BigDecimal downscale = new BigDecimal(DimensionHelper.DOWNSCALE);
+        BigDecimal downscale = new BigDecimal(DimensionHelper.CURRENT_DOWNSCALE);
         
         xMod = xMod.multiply(downscale);
         yMod = yMod.multiply(downscale);
@@ -152,44 +165,53 @@ public class ParticleSimGobject extends Gobject {
         
         if (this.showHistory) { // draw history in transparent layer!
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, this.historyOpacity));
-            for (int moli = 0; moli < psim.molCount; ++moli) {
-                Molecule m = psim.mols[moli];
-                MoleculeColourGroup mcg = molcgs.get(m.colGroup);
-                
-                if (m.oldBasis == null) continue;
-                
-                g2d.setPaint(new RadialGradientPaint(
-                        new Point2D.Float(
-                                (float) m.oldBasis.x,
-                                (float) m.oldBasis.y
-                        ),
-                        m.radius,
-                        new Point2D.Float(
-                                (float) m.oldBasis.x + m.radius / 2,
-                                (float) m.oldBasis.y - m.radius / 2
-                        ),
-                        new float[]{0f, 0.8f, 1f},
-                        new Color[]{
-                            mcg.history_primary,
-                            mcg.history_secondary,
-                            mcg.history_secondary,
-                        },
-                        CycleMethod.NO_CYCLE
-                ));
-                g2d.fillArc(
-                        (int) m.oldBasis.x - m.radius,
-                        (int) m.oldBasis.y - m.radius,
-                        2 * m.radius,
-                        2 * m.radius,
-                        0, 360
-                );
+            
+            // get the history for 1 second ago
+            HistorySave save;
+            if (historyQueue.size() < historyPeriod) {
+                save = historyQueue.peekFirst();
+            } else {
+                save = historyQueue.pollFirst();
+            }
+            
+            if (save != null) {
+                for (int moli = 0; moli < save.oldMols.length; ++moli) {
+                    OldMolecule m = save.oldMols[moli];
+                    MoleculeColourGroup mcg = molcgs.get(m.colGroup);
+
+                    g2d.setPaint(new RadialGradientPaint(
+                            new Point2D.Float(
+                                    (float) m.basis.x,
+                                    (float) m.basis.y
+                            ),
+                            m.radius,
+                            new Point2D.Float(
+                                    (float) m.basis.x + m.radius / 2,
+                                    (float) m.basis.y - m.radius / 2
+                            ),
+                            new float[]{0f, 0.8f, 1f},
+                            new Color[]{
+                                mcg.history_primary,
+                                mcg.history_secondary,
+                                mcg.history_secondary,
+                            },
+                            CycleMethod.NO_CYCLE
+                    ));
+                    g2d.fillArc(
+                            (int) m.basis.x - m.radius,
+                            (int) m.basis.y - m.radius,
+                            2 * m.radius,
+                            2 * m.radius,
+                            0, 360
+                    );
+                }
             }
             // revert to opaque
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
         }
         
         
-        for (int moli = 0; moli < psim.molCount; ++moli) {
+        for (int moli = 0; moli < psim.mols.length; ++moli) {
             Molecule m = psim.mols[moli];
             MoleculeColourGroup mcg = molcgs.get(m.colGroup);
             
@@ -227,7 +249,7 @@ public class ParticleSimGobject extends Gobject {
             
             g2d.setStroke(new BasicStroke(vectorWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
             
-            for (int moli = 0; moli < psim.molCount; ++moli) {
+            for (int moli = 0; moli < psim.mols.length; ++moli) {
                 Molecule m = psim.mols[moli];
                 
                 // vectors will be rendered as arrows
@@ -283,12 +305,12 @@ public class ParticleSimGobject extends Gobject {
             // is not noticed. This way, simulations will run at the same
             // perceived speed at different framerates.
             accumTicks += simSpeed / DimensionHelper.FRAMES_PER_SECOND;
-            boolean updateHistory = true;
             while (accumTicks >= 1) {
                 accumTicks--;
-                psim.update(updateHistory);
-                updateHistory = false;
+                psim.update();
             }
+            
+            historyQueue.addLast(new ParticleSimStateSave.HistorySave(psim));
             
             if (this.timeMonitor != null) {
                 // update the time monitor
@@ -334,7 +356,7 @@ public class ParticleSimGobject extends Gobject {
         
         if (td.affectedProperty.equals("isimulate")) {
             // an instant simulation
-            // if parameter is negative, this is a de-simulation (experimental)
+            // if parameter is negative, this is a de-simulation (BROKEN, with NO INTENTION OF A FIX!!)
             int cycles = td.json.getInt(0);
             boolean desim = cycles < 0;
             
@@ -350,7 +372,7 @@ public class ParticleSimGobject extends Gobject {
             }
             
             for (int i = 0; i < cycles; ++i) {
-                psim.update(true);
+                psim.update();
             }
             
             if (preserveTime) {
@@ -361,9 +383,21 @@ public class ParticleSimGobject extends Gobject {
                 for (Molecule mol : psim.mols) {
                     mol.momentum.reverseX();
                     mol.momentum.reverseY();
-                    mol.oldBasis = new MolVector2D(mol.basis);
                 }
             }
+        }
+        
+        if (td.affectedProperty.equals("save_pss")) {
+            ParticleSimStateSave.savePSim(td.json.getString(0), this.psim);
+        }
+        
+        if (td.affectedProperty.equals("load_pss")) {
+            ParticleSimStateSave.loadPSim(td.json.getString(0), this.psim);
+        }
+        
+        if (td.affectedProperty.equals("load_exclusive_pss")) {
+            this.psim = new ParticleSimulator();
+            ParticleSimStateSave.loadPSim(td.json.getString(0), this.psim);
         }
         
         common(td, frameNum);

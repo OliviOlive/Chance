@@ -62,7 +62,7 @@ public class TweenDeclaration {
                 td.gobmem.add((double) (td.json.getDouble(0) - nowVal) / (td.endFrame - td.startFrame));
             }
             
-            return (int) Math.floor((double) td.gobmem.get(0) + ((double) td.gobmem.get(1) * OliRenderer.frameNum - td.startFrame));
+            return (int) Math.floor((double) td.gobmem.get(0) + ((double) td.gobmem.get(1) * (OliRenderer.frameNum - td.startFrame)));
         }
         
         public static float simpleUpdateField(String propName, TweenDeclaration td, float nowVal) {
@@ -83,7 +83,7 @@ public class TweenDeclaration {
                 td.gobmem.add((float) (td.json.getDouble(0) - nowVal) / (td.endFrame - td.startFrame));
             }
             
-            return (float) td.gobmem.get(0) + ((float) td.gobmem.get(1) * OliRenderer.frameNum - td.startFrame);
+            return (float) td.gobmem.get(0) + ((float) td.gobmem.get(1) * (OliRenderer.frameNum - td.startFrame));
         }
         
         public static double simpleUpdateField(String propName, TweenDeclaration td, double nowVal) {
@@ -104,7 +104,7 @@ public class TweenDeclaration {
                 td.gobmem.add((double) (td.json.getDouble(0) - nowVal) / (td.endFrame - td.startFrame));
             }
             
-            return (double) td.gobmem.get(0) + ((double) td.gobmem.get(1) * OliRenderer.frameNum - td.startFrame);
+            return (double) td.gobmem.get(0) + ((double) td.gobmem.get(1) * (OliRenderer.frameNum - td.startFrame));
         }
         
         public static boolean simpleBooleanField(String propName, TweenDeclaration td, boolean nowVal) {

@@ -15,13 +15,14 @@ import org.json.JSONObject;
  */
 public class ParticleSimulator {    
     public Molecule[] mols;
-    public int molCount;
-    
     public int simWidth, simHeight;
-    
     public long simTime;
     
-    public static float NORMAL_SCALAR = 0.1F;
+    public static final float NORMAL_SCALAR = 0.1F;
+    
+    public ParticleSimulator() {
+        // NOP
+    }
     
     public ParticleSimulator(JSONObject config) {
         Object o = config.get("size");
@@ -46,7 +47,6 @@ public class ParticleSimulator {
             ja = (JSONArray) o;
             int parl = ja.length();
             this.mols = new Molecule[parl];
-            this.molCount = parl;
             for (int pari = 0; pari < parl; ++pari) {
                 JSONArray parja = ja.getJSONArray(pari);
                 int radius = parja.getInt(0);
@@ -69,13 +69,9 @@ public class ParticleSimulator {
         }
     }
     
-    public void update(boolean shouldUpdateOldBasis) {
-        for (int moli = 0; moli < molCount; ++moli) {
+    public void update() {
+        for (int moli = 0; moli < mols.length; ++moli) {
             Molecule mol = mols[moli];
-            
-            if (shouldUpdateOldBasis) {
-                mol.oldBasis = new Molecule.MolVector2D(mol.basis);
-            }
             
             mol.basis.add(mol.momentum.scale(NORMAL_SCALAR));
             
@@ -201,7 +197,7 @@ public class ParticleSimulator {
     }
     
     public Molecule getCollisionForMolecule(Molecule mol) {
-        for (int moli = 0; moli < molCount; ++moli) {
+        for (int moli = 0; moli < mols.length; ++moli) {
             Molecule molCol = mols[moli];
             
             if (molCol == mol) { // molecules should not collide with themselves.. silly things
