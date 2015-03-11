@@ -25,6 +25,7 @@ public class TextGobject extends Gobject {
     public boolean autoFontSize;
     public boolean autoFontSizeOnResize;
     public float fontSize;
+    public String justify;
     
     public TextGobject(String id, JSONObject ja) {
         super(id, ja);
@@ -34,6 +35,7 @@ public class TextGobject extends Gobject {
         this.col = ScriptReader.strToColour(ja.optString("colour", "#FFFFFF"));
         this.autoFontSize = ja.optBoolean("autoFontSize", false);
         this.autoFontSizeOnResize = ja.optBoolean("autoFontSizeOnResize", false);
+        this.justify = ja.optString("justify", "center");
     }
     
     public void common(TweenDeclaration td) {
@@ -58,6 +60,14 @@ public class TextGobject extends Gobject {
     @Override
     public void instantChange(TweenDeclaration td, int frameNum) {
         super.instantChange(td, frameNum);
+        
+        if (td.affectedProperty.equals("text")) {
+            this.text = td.json.getString(0);
+            if (this.autoFontSizeOnResize) {
+                this.autoFontSize = true;
+            }
+        }
+        
         this.common(td);
     }
     
@@ -69,6 +79,24 @@ public class TextGobject extends Gobject {
         
         if (this.autoFontSize) {
             float size = 0;
+            while (true) {
+                size+=50;
+                FontMetrics fm = g2d.getFontMetrics(font.deriveFont(this.font.getStyle(), size));
+                Rectangle2D strBounds = fm.getStringBounds(this.text, g2d);
+                if (strBounds.getWidth() > DimensionHelper.getRealDimensions(bounds.width) || strBounds.getHeight() > DimensionHelper.getRealDimensions(bounds.height)) {
+                    size-=50;
+                    break;
+                }
+            }
+            while (true) {
+                size+=20;
+                FontMetrics fm = g2d.getFontMetrics(font.deriveFont(this.font.getStyle(), size));
+                Rectangle2D strBounds = fm.getStringBounds(this.text, g2d);
+                if (strBounds.getWidth() > DimensionHelper.getRealDimensions(bounds.width) || strBounds.getHeight() > DimensionHelper.getRealDimensions(bounds.height)) {
+                    size-=20;
+                    break;
+                }
+            }
             while (true) {
                 ++size;
                 FontMetrics fm = g2d.getFontMetrics(font.deriveFont(this.font.getStyle(), size));
@@ -108,7 +136,14 @@ public class TextGobject extends Gobject {
         y = (int) (DimensionHelper.getRealDimensions(bounds.y + (bounds.height / 2)) + (strBounds.getHeight()/4));
         g2d.setColor(this.col);
         g2d.setFont(font);
-        g2d.drawString(this.text, x, y);
+        switch (this.justify) {
+            case "center":
+                g2d.drawString(this.text, x, y);
+                break;
+            case "left":
+                g2d.drawString(this.text, DimensionHelper.getRealDimensions(bounds.x), y);
+                break;
+        }
     }
     
 }

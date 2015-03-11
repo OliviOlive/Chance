@@ -13,6 +13,7 @@ import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import oli.bbp.DimensionHelper;
@@ -146,8 +147,14 @@ public class ParticleSimGobject extends Gobject {
         double yMod = this.bounds.height / psim.simHeight;
         */
         
-        BigDecimal xMod = new BigDecimal(this.bounds.width).divide(new BigDecimal(psim.simWidth));
-        BigDecimal yMod = new BigDecimal(this.bounds.height).divide(new BigDecimal(psim.simHeight));
+        BigDecimal xMod, yMod;
+        
+        try {
+            xMod = new BigDecimal(this.bounds.width).divide(new BigDecimal(psim.simWidth), RoundingMode.HALF_UP);
+            yMod = new BigDecimal(this.bounds.height).divide(new BigDecimal(psim.simHeight), RoundingMode.HALF_UP);
+        } catch (ArithmeticException e) {
+            throw e;
+        }
         
         BigDecimal downscale = new BigDecimal(DimensionHelper.CURRENT_DOWNSCALE);
         
@@ -315,7 +322,10 @@ public class ParticleSimGobject extends Gobject {
                 // update the time monitor
                 double timeVal = (double) psim.simTime / timeMonitor_divisor;
                 double dpPow = Math.pow(10, timeMonitor_dp);
-                String timeRep = Double.toString(Math.floor(timeVal * dpPow) / dpPow);
+                
+                double speedVal = this.simSpeed / timeMonitor_divisor;
+                double spPow = Math.pow(10, timeMonitor_dp);
+                String timeRep = Double.toString(Math.floor(speedVal * spPow) / spPow) + "×, " + Double.toString(Math.floor(timeVal * dpPow) / dpPow);
                 this.timeMonitor.text = timeRep;
             }
         }

@@ -65,13 +65,15 @@ public class Main {
         
         OliRenderer.renderStartTime = timeMillis;
         
+        boolean asapMode = System.getProperty("olibbp.asap") != null;
+        
         while (OliRenderer.frameNum < OliRenderer.frameDur) {
             long curTim = System.currentTimeMillis();
             if (curTim < timeMillis) {
                 try {
                     long sleepy = timeMillis - curTim;
                     //totalSleepy += sleepy;
-                    Thread.sleep(sleepy);       
+                    if (! asapMode) Thread.sleep(sleepy);       
                 } catch (InterruptedException ex) {
                     log.log(Level.SEVERE, null, ex);
                 }
