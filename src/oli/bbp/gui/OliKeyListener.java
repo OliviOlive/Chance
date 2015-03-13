@@ -7,6 +7,7 @@ package oli.bbp.gui;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.logging.Logger;
+import oli.bbp.DimensionHelper;
 import oli.bbp.Main;
 
 /**
@@ -27,6 +28,11 @@ public class OliKeyListener implements KeyListener {
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             log.info("Escape pressed.");
             System.exit(0);
+        }
+        
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            // skip 10 seconds
+            Main.skipFrames += DimensionHelper.FRAMES_PER_SECOND * 10;
         }
     }
 

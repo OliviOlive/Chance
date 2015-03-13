@@ -39,6 +39,8 @@ public class Main {
     public static final int REPORT_EVERY_FRAMES = 50;
     public static final int DIGITS_FRAMES = 6;
     
+    public static volatile int skipFrames = 0;
+    
     public static void onScreenMode() {
         SoundScheduler.instance = new DisplaySoundScheduler();
         
@@ -96,6 +98,13 @@ public class Main {
             } else {
                 log.warning("Cannot cast Graphics to Graphics2D!");
                 return;
+            }
+            
+            
+            if (skipFrames > 0) {
+                for (int i = 0; i < skipFrames; ++i) {
+                    OliRenderer.preprocessFrame();
+                }
             }
         }
     }

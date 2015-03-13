@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import oli.bbp.DimensionHelper;
 import oli.bbp.ScriptReader;
+import oli.bbp.gfx.TweenDeclaration;
 import org.json.JSONObject;
 
 /**
@@ -24,6 +25,25 @@ public class RectGobject extends Gobject {
         isFilled = ja.optBoolean("filled", false);
         col = ScriptReader.strToColour(ja.optString("colour", "#FFFFFF"));
     }
+
+    @Override
+    public void instantChange(TweenDeclaration td, int frameNum) {
+        super.instantChange(td, frameNum);
+        
+        this.common(td, frameNum);
+    }
+
+    @Override
+    public void tween(TweenDeclaration td, int frameNum) {
+        super.tween(td, frameNum);
+        
+        this.common(td, frameNum);
+    }
+    
+    public void common(TweenDeclaration td, int frameNum) {
+        this.col = TweenDeclaration.TweenSimpleHandlers.simpleUpdateColourRGB("colour", td, col);
+    }
+    
 
     @Override
     public void draw(Graphics2D g2d) {
