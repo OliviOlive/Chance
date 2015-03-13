@@ -101,10 +101,10 @@ public class Main {
             }
             
             
-            if (skipFrames > 0) {
-                for (int i = 0; i < skipFrames; ++i) {
-                    OliRenderer.preprocessFrame();
-                }
+            while (skipFrames > 0) {
+                --skipFrames;
+                OliRenderer.preprocessFrame();
+                ++OliRenderer.frameNum; // don't bother rendering it
             }
         }
     }
