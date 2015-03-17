@@ -13,6 +13,7 @@ import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -150,8 +151,9 @@ public class ParticleSimGobject extends Gobject {
         BigDecimal xMod, yMod;
         
         try {
-            xMod = new BigDecimal(this.bounds.width).divide(new BigDecimal(psim.simWidth), RoundingMode.HALF_UP);
-            yMod = new BigDecimal(this.bounds.height).divide(new BigDecimal(psim.simHeight), RoundingMode.HALF_UP);
+            MathContext mc = new MathContext(7, RoundingMode.HALF_UP);
+            xMod = new BigDecimal(this.bounds.width).divide(new BigDecimal(psim.simWidth), mc);
+            yMod = new BigDecimal(this.bounds.height).divide(new BigDecimal(psim.simHeight), mc);
         } catch (ArithmeticException e) {
             throw e;
         }
