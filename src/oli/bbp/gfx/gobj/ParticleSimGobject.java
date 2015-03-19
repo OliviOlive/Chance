@@ -409,7 +409,7 @@ public class ParticleSimGobject extends Gobject {
         
         if (td.affectedProperty.equals("load_exclusive_pss")) {
             this.psim = new ParticleSimulator();
-            ParticleSimStateSave.loadPSimsh(td.json.getString(0), this.psim);
+            ParticleSimStateSave.loadPSim(td.json.getString(0), this.psim);
         }
         
         common(td, frameNum);
