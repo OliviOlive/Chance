@@ -346,6 +346,7 @@ public class ParticleSimGobject extends Gobject {
             psgo.historyOpacity = this.historyOpacity;
             psgo.psim = this.psim;
             psgo.showHistory = this.showHistory;
+            psgo.historyPeriod = this.historyPeriod;
             psgo.showVectors = this.showVectors;
             psgo.vectorCol = this.vectorCol;
             psgo.vectorScalar = this.vectorScalar;
@@ -408,7 +409,7 @@ public class ParticleSimGobject extends Gobject {
         
         if (td.affectedProperty.equals("load_exclusive_pss")) {
             this.psim = new ParticleSimulator();
-            ParticleSimStateSave.loadPSim(td.json.getString(0), this.psim);
+            ParticleSimStateSave.loadPSimsh(td.json.getString(0), this.psim);
         }
         
         common(td, frameNum);

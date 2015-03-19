@@ -87,19 +87,34 @@ public abstract class Gobject {
         }
         switch (td.affectedProperty) {
             case "bounds":
+            case "relativeLocation":
                 if (isFirstFrame) {
-                    // store initial bounds
-                    td.gobmem.ensureCapacity(8);
-                    td.gobmem.add(this.bounds.x);
-                    td.gobmem.add(this.bounds.y);
-                    td.gobmem.add(this.bounds.width);
-                    td.gobmem.add(this.bounds.height);
-                    
-                    // also calculate & store gradients
-                    td.gobmem.add(((double) td.json.getInt(0) - this.bounds.x) / lenFrames);
-                    td.gobmem.add(((double) td.json.getInt(1) - this.bounds.y) / lenFrames);
-                    td.gobmem.add(((double) td.json.getInt(2) - this.bounds.width) / lenFrames);
-                    td.gobmem.add(((double) td.json.getInt(3) - this.bounds.height) / lenFrames);
+                    if (td.affectedProperty.equals("relativeLocation")) {
+                        // store initial bounds
+                        td.gobmem.ensureCapacity(8);
+                        td.gobmem.add(this.bounds.x);
+                        td.gobmem.add(this.bounds.y);
+                        td.gobmem.add(this.bounds.width);
+                        td.gobmem.add(this.bounds.height);
+
+                        td.gobmem.add((double) td.json.getInt(0) / lenFrames);
+                        td.gobmem.add((double) td.json.getInt(1) / lenFrames);
+                        td.gobmem.add(0.0d); // no size changes with relativeLocation
+                        td.gobmem.add(0.0d);
+                    } else {
+                        // store initial bounds
+                        td.gobmem.ensureCapacity(8);
+                        td.gobmem.add(this.bounds.x);
+                        td.gobmem.add(this.bounds.y);
+                        td.gobmem.add(this.bounds.width);
+                        td.gobmem.add(this.bounds.height);
+
+                        // also calculate & store gradients
+                        td.gobmem.add(((double) td.json.getInt(0) - this.bounds.x) / lenFrames);
+                        td.gobmem.add(((double) td.json.getInt(1) - this.bounds.y) / lenFrames);
+                        td.gobmem.add(((double) td.json.getInt(2) - this.bounds.width) / lenFrames);
+                        td.gobmem.add(((double) td.json.getInt(3) - this.bounds.height) / lenFrames);
+                    }
                 }
                 this.bounds.setBounds(
                         (int) td.gobmem.get(0) + (int) Math.round(numFrame * (double) td.gobmem.get(4)),

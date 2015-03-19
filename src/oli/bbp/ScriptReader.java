@@ -75,6 +75,16 @@ public class ScriptReader {
                     throw new ScriptFormatException(td, "POST [INSANE] Expected =4 params");
                 }
             break;
+            case "relativeLocation":
+                if (td.json.length() != 2) {
+                    throw new ScriptFormatException(td, "Expected =2 params");
+                }
+                td.json.put(0, DimensionHelper.getX(td.json.get(0)));
+                td.json.put(1, DimensionHelper.getY(td.json.get(1)));
+                if (td.json.length() != 2) {
+                    throw new ScriptFormatException(td, "POST [INSANE] Expected =2 params");
+                }
+            break;
             case "opacity":
                 if (td.json.length() != 1) {
                     throw new ScriptFormatException(td, "Expected =1 params");
