@@ -58,6 +58,8 @@ public class OliRenderer {
         }
     }
     
+    public static boolean skipVid = System.getProperty("olibbp.skipVideo", "F").equals("true");
+    
     /**
      * Actually draws the next frame.
      *  It additionally triggers sounds in the Sound Scheduler.
@@ -69,34 +71,36 @@ public class OliRenderer {
         
         SoundScheduler.checkForPrescheduled(frameNum);
         
-        if (Main.isOnscreen) {
-            String frameCounter = "Frame Monitor: " + String.valueOf(frameNum) + " of " + String.valueOf(frameDur-1);
-            String secCounter = "Supposed Time: " + String.valueOf((float) frameNum / DimensionHelper.FRAMES_PER_SECOND);
-            String rsCounter = "Real Time: " + String.valueOf((float) (System.currentTimeMillis() - renderStartTime) / 1000);
+        if (! skipVid) {
+            if (Main.isOnscreen) {
+                String frameCounter = "Frame Monitor: " + String.valueOf(frameNum) + " of " + String.valueOf(frameDur-1);
+                String secCounter = "Supposed Time: " + String.valueOf((float) frameNum / DimensionHelper.FRAMES_PER_SECOND);
+                String rsCounter = "Real Time: " + String.valueOf((float) (System.currentTimeMillis() - renderStartTime) / 1000);
 
-            int fh = GfxHelper.getTextHeight(frameCounter, g.getFontMetrics(), g);
+                int fh = GfxHelper.getTextHeight(frameCounter, g.getFontMetrics(), g);
 
-            FontMetrics fm = g.getFontMetrics();
+                FontMetrics fm = g.getFontMetrics();
 
-            int wid = Math.max(fm.stringWidth(frameCounter), Math.max(fm.stringWidth(secCounter), fm.stringWidth(rsCounter)));
+                int wid = Math.max(fm.stringWidth(frameCounter), Math.max(fm.stringWidth(secCounter), fm.stringWidth(rsCounter)));
 
-            g.setColor(Color.black);
-            g.fillRect(0, 0, g.getFontMetrics().stringWidth(frameCounter), fh * 3);
+                g.setColor(Color.black);
+                g.fillRect(0, 0, g.getFontMetrics().stringWidth(frameCounter), fh * 3);
 
-            g.setColor(Color.cyan);
-            g.drawString(frameCounter, 0, fh);
-            g.drawString(secCounter, 0, fh*2);
-            g.drawString(rsCounter, 0, fh*3);
-        }
-        
-        for (Gobject gob: Gobject.ago) {
-            if (gob.opacity > 0.0) {
-                BufferedImage bi = new BufferedImage(DimensionHelper.RESOLUTION_WIDTH, DimensionHelper.RESOLUTION_HEIGHT, BufferedImage.TYPE_INT_ARGB);
-                Graphics2D gbi = bi.createGraphics();
-                setupHints(gbi);
-                gob.draw(gbi);
-                g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, gob.opacity));
-                g.drawImage(bi, null, 0, 0);
+                g.setColor(Color.cyan);
+                g.drawString(frameCounter, 0, fh);
+                g.drawString(secCounter, 0, fh*2);
+                g.drawString(rsCounter, 0, fh*3);
+            }
+
+            for (Gobject gob: Gobject.ago) {
+                if (gob.opacity > 0.0) {
+                    BufferedImage bi = new BufferedImage(DimensionHelper.RESOLUTION_WIDTH, DimensionHelper.RESOLUTION_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D gbi = bi.createGraphics();
+                    setupHints(gbi);
+                    gob.draw(gbi);
+                    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, gob.opacity));
+                    g.drawImage(bi, null, 0, 0);
+                }
             }
         }
         

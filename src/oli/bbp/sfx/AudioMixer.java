@@ -24,7 +24,7 @@ public class AudioMixer {
     public static class AudioInputTrack {
         public File audioFile;
         public AudioFormat format;
-        public int[][] data;
+        public double[][] data;
         public int sampleCount;
         public int channelCount;
         
@@ -50,6 +50,7 @@ public class AudioMixer {
                 }
                 sampleCount = (int) wf.getNumFrames();
                 
+                /*
                 int preamp = 1 << (31 - wf.getValidBits());
                 int subtract;
                 if (wf.getValidBits() < 32) {
@@ -62,11 +63,18 @@ public class AudioMixer {
                     subtract = 0;
                 }
                 
+                
                 log.log(Level.INFO, "Preamp is {0}", preamp);
                 
-                data = new int[channelCount][sampleCount];
+                // owk removed this section during double usage
+                */
                 
-                int[] singleSampleBuffer = new int[channelCount];
+                int subtract = 0;
+                int preamp = 1;
+                
+                data = new double[channelCount][sampleCount];
+                
+                double[] singleSampleBuffer = new double[channelCount];
                 
                 for (int i = 0; i < sampleCount; ++i) {
                     wf.readFrames(singleSampleBuffer, 1);
@@ -91,15 +99,24 @@ public class AudioMixer {
         public int startSample;
         public double strength;
         
+        public int startOffset;
+        public int trimLength;
+        
         public boolean canRead(int pos) {
             if (startSample > pos)
                 return false;
             
-            return (pos - startSample) < track.data[0].length;
+            int sampleI = (pos - startSample) + startOffset;
+            
+            if (trimLength != -1 && sampleI > trimLength) {
+                return false; // out of the trim section
+            }
+            
+            return sampleI < track.data[0].length;
         }
         
-        public int read(int channel, int pos) {
-            return (int) (track.data[channel][pos - startSample] * strength);
+        public double read(int channel, int pos) {
+            return (track.data[channel][(pos - startSample) + startOffset] * strength);
         }
     }
     
@@ -126,6 +143,8 @@ public class AudioMixer {
             p.track = usedTrack;
             p.startSample = (int) ((double) e.startFrame / DimensionHelper.FRAMES_PER_SECOND) * SoundScheduler.sampleRate;
             p.strength = e.volume;
+            p.startOffset = e.startOffset;
+            p.trimLength = e.trimLength;
             aitps.add(p);
         }
         
@@ -134,10 +153,10 @@ public class AudioMixer {
         try {
             WavFile outwf = WavFile.newWavFile(outFile, 2, soundtrackLength, 32, SoundScheduler.sampleRate);
             
-            int[][] outSampleBuffer;
+            double[][] outSampleBuffer;
             
             for (int i = 0; i < soundtrackLength; ++i) {
-                outSampleBuffer = new int[2][1];
+                outSampleBuffer = new double[2][1];
                 for (AudioInputTrackPointer tp : aitps) {
                     if (tp.canRead(i)) {
                         outSampleBuffer[0][0] += tp.read(0, i);

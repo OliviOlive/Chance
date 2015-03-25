@@ -228,11 +228,21 @@ public class ScriptReader {
         len = ssja.length();
         for (int i = 0; i < len; ++i) {
             JSONArray sseja = ssja.getJSONArray(i);
-            SoundScheduler.playSound(
-                    DimensionHelper.getFramesFromSeconds(sseja.getDouble(0)),
-                    ScriptReader.resMap.get(sseja.getString(1)),
-                    (float) sseja.getDouble(2)
-            );
+            if (sseja.length() == 3) {
+                SoundScheduler.playSound(
+                        DimensionHelper.getFramesFromSeconds(sseja.getDouble(0)),
+                        ScriptReader.resMap.get(sseja.getString(1)),
+                        (float) sseja.getDouble(2)
+                );
+            } else {
+                SoundScheduler.playSound(
+                        DimensionHelper.getFramesFromSeconds(sseja.getDouble(0)),
+                        ScriptReader.resMap.get(sseja.getString(1)),
+                        (float) sseja.getDouble(2),
+                        (int) (SoundScheduler.sampleRate * sseja.getDouble(3)),
+                        (int) (SoundScheduler.sampleRate * sseja.getDouble(4))
+                );
+            }
         }
         
         for (Gobject gob : Gobject.ago) {

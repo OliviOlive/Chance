@@ -11,15 +11,29 @@ import java.util.ArrayList;
  * @author oliver
  */
 public abstract class SoundScheduler {
+
+    public abstract boolean supportsSourceSelection();
+    
     public static class SoundEvent {
         public int startFrame;
         public File soundFile;
         public float volume;
         
+        public int startOffset = 0;
+        public int trimLength = -1;
+        
         public SoundEvent(int start, File sndF, float vol) {
             this.startFrame = start;
             this.soundFile = sndF;
             this.volume = vol;
+        }
+        
+        public SoundEvent(int start, File sndF, float vol, int startOff, int trimLen) {
+            this.startFrame = start;
+            this.soundFile = sndF;
+            this.volume = vol;
+            this.startOffset = startOff;
+            this.trimLength = trimLen;
         }
     }
     
@@ -39,8 +53,10 @@ public abstract class SoundScheduler {
      * It is expected that in toFile mode, this will log a sound event for the Mixer.
      * @param sound
      * @param volume
+     * @param startOffset
+     * @param trimLength
      */
-    public abstract void playSound(File sound, float volume);
+    public abstract void playSound(File sound, float volume, int startOffset, int trimLength);
     
     /**
      * Pre-schedules a sound to be played.
@@ -53,10 +69,19 @@ public abstract class SoundScheduler {
         prescheduled.add(new SoundEvent(frame, sound, volume));
     }
     
+    public static void playSound(int frame, File sound, float volume, int startOffset, int trimLength) {
+        prescheduled.add(new SoundEvent(frame, sound, volume, startOffset, trimLength));
+    }
+    
     public static void checkForPrescheduled(int frame) {
         for (SoundEvent se : prescheduled) {
             if (se.startFrame == frame) {
-                SoundScheduler.instance.playSound(se.soundFile, se.volume);
+                if (se.startOffset != 0 || se.trimLength != -1) {
+                    if (! SoundScheduler.instance.supportsSourceSelection()) {
+                        continue;
+                    }
+                }
+                SoundScheduler.instance.playSound(se.soundFile, se.volume, se.startOffset, se.trimLength);
             }
         }
     }

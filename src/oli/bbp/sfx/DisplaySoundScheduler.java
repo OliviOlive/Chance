@@ -14,7 +14,7 @@ import javax.sound.sampled.Clip;
  */
 public class DisplaySoundScheduler extends SoundScheduler {
     @Override
-    public void playSound(File sound, float volume) {
+    public void playSound(File sound, float volume, int startOffset, int trimLength) {
         try {
             Clip c = AudioSystem.getClip();
             AudioInputStream inputStream = AudioSystem.getAudioInputStream(sound);
@@ -25,5 +25,10 @@ public class DisplaySoundScheduler extends SoundScheduler {
         } catch (Exception e) { // 'pokémon exception handling'
             e.printStackTrace(System.out);
         }
+    }
+
+    @Override
+    public boolean supportsSourceSelection() {
+        return false;
     }
 }
